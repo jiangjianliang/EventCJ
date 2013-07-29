@@ -1,0 +1,23 @@
+module analyze
+
+imports
+  libstratego-lib
+  include/EventCJ
+  eventcj/intermediates
+  lib/editor-common.generated
+
+rules
+  analyze:
+    t -> t'
+    where
+    	t' := <topdown(try(replaceProceed))>t
+
+  // Records the definition of an entity in a dynamic rule GetEntity.
+  replaceProceed:
+    Layer(name, body) -> Layer(name, <topdown(try(replaceProceedBody))>body)
+   
+  replaceProceedBody:
+  	MethodDec(head,body) -> MethodDec(head,<topdown(try(replaceValidProceed))>body)
+  
+  replaceValidProceed:
+  	Proceed() -> ValidProceed()

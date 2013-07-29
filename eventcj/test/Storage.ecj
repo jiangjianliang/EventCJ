@@ -1,0 +1,32 @@
+package main;
+
+direction StorageDir{
+	declare event Activation(Storage s)
+	: after call(void Storage.doSomething())
+		&& target(s):sendTo(s);
+	
+	transition Activation():
+		* activate cacheLayer;
+	
+}
+
+public class Storage{
+	layer cacheLayer{
+		around void getItem(int key){
+			System.out.println("Cache Lookup");
+		}
+	}
+	
+	void getItem(int key){
+		System.out.println("Disk Lookup");
+	}
+	
+	void doSomething(){}
+	
+	public static void main(String[] args){
+		Storage s = new Storage();
+		s.getItem(10);
+		s.doSomething();
+		s.getItem(10);
+	}
+}

@@ -1,0 +1,60 @@
+module eventcj/pattern
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	libaspectj-front
+	include/EventCJ
+	lib/editor-common.generated
+
+rules
+  pat2string:
+   	Wildcard() -> $[*]
+   
+  pat2string:
+  	DotWildcard() -> $[..]
+  
+  pat2string:
+  	RefTypePattern(t) -> <pat2string>t
+  	
+  pat2string:
+  	NamePattern(n) -> $[[n]]
+  
+  pat2string:
+  	Subtype(t) -> $[[<pat2string>t]+]
+  
+  pat2string:
+  	Void() -> $[void]
+  
+  pat2string:
+  	MethodPattern(anno,mod,retType,member,param*,throw) -> $[[retType'] [member'][param'*]]
+  	where
+  		retType' := <pat2string>retType;
+  		member' := <pat2string>member;
+  		param'* := <pp-java-string><list-to-args><map(pat2string; wrapAsExpr)>param*
+  
+  wrapAsExpr:
+  	t -> ExprName(Id(t))
+  
+  pat2string:
+  	ConstrPattern(anno,mod,constrpat,param,throw) -> $[[<pat2string>constrpat]([<map(pat2string)>param])]
+
+  pat2string:
+  	MemberName(typat, idpat) -> $[[<pat2string>typat].[<pat2string>idpat]]
+  		 
+  
+  pat2string:
+  	WildcardMemberName(typat , idpat) -> $[[<pat2string>typat]..[idpat]]
+  
+  pat2string:
+  	ConstrName() -> $[new]
+  
+  pat2string:
+  	ConstrName(typat) -> $[[<pat2string>typat].new]
+  
+  pat2string:
+  	WildcardConstrName(typat) -> $[[<pat2string>typat]..new]
+  
+  pat2string:
+  	t -> <ast2abox(|[<import-term(include/EventCJ.generated.pp.af)>,<import-term(include/EventCJ.pp.af)>]);box2text-string(|80)> t

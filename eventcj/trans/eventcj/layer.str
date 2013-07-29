@@ -1,0 +1,93 @@
+module eventcj/layer
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	include/EventCJ
+	lib/editor-common.generated
+	eventcj/vars
+	eventcj/layer-manager
+	
+rules
+	convertThis:
+		This() -> <genThis>()
+		
+	genThis:
+  		() -> Id("this_object_eventcj_generated")
+		
+	to-aspect(|cname):
+		ClassBody(b*) -> <map(to-advice(|cname))>meth*
+		where
+			target* := <remove-all(?Layer(_,_))> b*;
+			meth* := <filter(?(MethodDec(_,_)))>b*
+			
+	to-advice(|cname):
+		MethodDec(MethodDecHead(_,_,retT,Id(mname),param*,_),_) -> 
+		$[before[param'*]: within([cname])&& execution([retT'] [cname].[mname][vartype*]) && this([thisobj]) && args[paramVar*]{
+			Iterator<Layer> it = [thisobj].getLayerManager().iterator();
+			while(it.hasNext()){
+				[cname].LayerFor[cname] l = ([cname].LayerFor[cname])it.next();
+				l.[mname]Before[paramVar*];
+			}
+		}
+		after[param'*]: within([cname])&& execution([retT'] [cname].[mname][vartype*]) && this([thisobj]) && args[paramVar*]{
+			Iterator<Layer> it = [thisobj].getLayerManager().reverseIterator();
+			while(it.hasNext()){
+				[cname].LayerFor[cname] l = ([cname].LayerFor[cname])it.next();
+				l.[mname]After[paramVar*];
+			}
+		}
+		]
+		where
+			thisobj := <pp-java-string><genThis>();
+			paramVar* := <pp-java-string><list-to-args><map(extract-formal-vars)> param*;
+			param'* := <pp-java-string><list-to-args>[Param([],ClassOrInterfaceType(TypeName(Id(cname)),None()),Id(thisobj)) | param*];
+			retT' := <pp-java-string> retT;
+			vartype* := <pp-java-string><list-to-args><map(extract-formal-types)>param*
+	
+/*    
+  to-aspect(|cname):
+    Layer(Id(name), d*) ->
+    $[[d'*]]
+    where
+    	d'* := <map(to-aspect(|cname,name))> d* 
+
+
+  to-aspect(|cname,lname):
+  	Activation(b) -> $[after(String s, [cname] [thisObj]): pcActivation()&&args(s,[thisObj])&&if(s.equals("[lname]"))[b']]
+  	where
+  		b' := <pp-java-string><topdown(try(convertThis))>b;
+  		thisObj := <pp-java-string><genThis>()
+  
+  to-aspect(|cname,lname):
+  	Deactivation(b) -> $[before(String s, [cname] [thisObj]): pcDeactivation()&&args(s,[thisObj])&&if(s.equals("[lname]"))[b']]
+  	where
+  		b' := <pp-java-string><topdown(try(convertThis))>b;
+  		thisObj := <pp-java-string><genThis>()
+
+  
+  to-aspect(|cname,lname):
+  	PartialMethodDec(h, b) -> $[[h'][b']]
+  	where
+  		h' := <to-aspect(|cname,lname)> h;
+  		b' := <pp-java-string><topdown(try(convertThis))> b
+  
+  to-aspect(|cname,lname):
+  	PartialMethodHead(_, knd, resT, Id(mname), param*, thrw)-> $[[knd'][param'*]: within([cname])&& execution([resT'] [cname].[mname][vartype*]) && if([lm].getInstance().isActive([<to-layer>Id(lname)],[thisobj])) && this([thisobj]) && args[paramVar*]]
+  	where
+  		thisobj := <pp-java-string><genThis>();
+  		paramVar* := <pp-java-string><list-to-args><map(extract-formal-vars)> param*;
+  		param'* := <pp-java-string><list-to-args>[Param([],ClassOrInterfaceType(TypeName(Id(cname)),None()),Id(thisobj)) | param*];
+  		resT' := <pp-java-string> resT;
+  		knd' := <to-aspect> knd;
+  		lm := <get-layer-manager>();
+  		vartype* := <pp-java-string><list-to-args><map(extract-formal-types)>param*
+  
+  to-aspect:
+  	AfterTiming() -> $[after]
+  	
+  to-aspect:
+  	BeforeTiming() -> $[before]
+
+*/

@@ -1,0 +1,21 @@
+package main;
+
+class Navigation extends MapActivity implements Runnable, LocationListener{
+	MapView mapView;
+	MyLocationOverlay overlay;
+	WifiManager wifiManager;
+	BuildingGuide buildingGuide;
+	
+	void onStatusChanged(){
+		
+	}
+	
+	void run(){
+		
+	}
+	
+	void onCreate(Bundle status){
+		overlay.runOnFirstFix(this);
+		//...
+	}
+}

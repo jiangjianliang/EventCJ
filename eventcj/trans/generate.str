@@ -1,0 +1,154 @@
+module generate
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  libjava-front
+  include/EventCJ
+  lib/editor-common.generated
+  eventcj/layer
+  eventcj/direction
+  eventcj/innerclass
+  eventcj/vars
+
+rules
+
+  to-java:
+  	CompilationUnit(p,i*,t) ->
+  	$[[p']
+  	[i'*]
+  	import java.util.Iterator;
+  	import eventcj.*;
+  	[t']
+  	]
+  	where
+  		p' := <pp-java-string> p;
+  		i'* := <map(pp-java-string)>i*;
+  		t' := <map(to-java)>t
+  		
+  // to-java:
+  	// MethodDec(head,block) -> $[
+  		// [meth]
+  	// ]
+  	// where
+  		// meth := <pp-java-string> MethodDec(head,block)
+  
+  to-java:
+  	ClassDecHead(pb*, Id(name), typearg, parent, impls) -> 
+  	$[[pb'*] class [name] [typearg'] [parent'] [impls']]
+  	where
+  		pb'* := <map(pp-java-string)> pb*;
+  		typearg' := <pp-java-string> typearg;
+  		parent' := <pp-java-string> parent;
+  		impls' := <pp-java-string><addContextual>impls
+  		
+  addContextual:
+  	Some(ImplementsDec(a*)) -> Some(ImplementsDec([InterfaceType(TypeName(Id("Contextual")), None())|a*]))
+  
+  addContextual:
+  	None() -> Some(ImplementsDec([InterfaceType(TypeName(Id("Contextual")), None())]))
+  		
+  to-java:
+  	cd@ClassDec(head@ClassDecHead(_,Id(name),_,_,_),body) -> 
+  	$[[head']{
+  		[body']
+  	}]
+  	where
+  		head' := <to-java> head;
+  		body' := <to-java(|name)> body
+  	
+  to-java(|cname):
+  	ClassBody(b*) -> $[InstanceLayerManager [lm]=new DefaultInstanceLayerManager();
+  	public InstanceLayerManager getLayerManager(){return [lm];}
+  	abstract class LayerFor[cname] extends Layer{
+		[<map(pp-java-string)><concat><map(genEmptyMethod)>meth*]
+	}
+	public Layer createLayerForName(String lname){
+		[<foldr(<returnS(|$[lname])>(), concatIfBranches, genLayerCreater(|$[lname]))>layer*]
+	}
+	[l*]
+	[b'*]
+	[fromPartialMethod]]
+  	where
+  		b'* := <map(pp-java-string)><map(try(extendMethodBody(|cname)))><remove-all(?Layer(_,_))> b*;
+  		meth* := <filter(?(MethodDec(_,_)))>b*;
+  		layer* := <filter(?(Layer(_,_)))> b*;
+  		l* := <map(layer-to-inner(|cname, meth*))>layer*;
+  		lm := <instance-layer-manager-var>();
+  		fromPartialMethod := <map(genMethodForPartialMethod(|cname))>meth*
+  
+  genMethodForPartialMethod(|cname):
+  	d@MethodDec(h@MethodDecHead(anno,_,_,_,_,_),_) -> <genMethodForPartialMethod'(|cname)>(<filter(?Static())>anno,<filter(?Abstract())>anno,d) 
+  		
+  genMethodForPartialMethod'(|cname):
+  	([],[],MethodDec(h@MethodDecHead(anno,typep,retT,Id(mname),param*,throw),_)) -> 
+  	$[[<pp-java-string>MethodDecHead(anno,typep,Void(),Id($[[mname]Before]),param*,throw)]{
+  		Iterator<Layer> it = getLayerManager().iterator();
+		while(it.hasNext()){
+			LayerFor[cname] l = (LayerFor[cname])it.next();
+			l.[mname]Before[paramVar*];
+		}
+	}
+	[<pp-java-string>MethodDecHead(anno,typep,Void(),Id($[[mname]After]),param*,throw)]{
+  		Iterator<Layer> it = getLayerManager().reverseIterator();
+		while(it.hasNext()){
+			LayerFor[cname] l = (LayerFor[cname])it.next();
+			l.[mname]After[paramVar*];
+		}
+	}
+  	]
+  	where
+  		paramVar* := <pp-java-string><list-to-args><map(extract-formal-vars)> param*
+  		
+  genMethodForPartialMethod'(|cname):
+  	(_,_,_) -> $[]
+  
+  extendMethodBody(|cname):
+  	d@MethodDec(h@MethodDecHead(anno,_,_,_,_,_),_) -> <extendMethodBody'(|cname)>(<filter(?Static())>anno,<filter(?Abstract())>anno,d)
+  
+  extendMethodBody'(|cname):
+  	([],[],MethodDec(h@MethodDecHead(anno,_,_,Id(name),param*,_),b)) -> MethodDec(h,<insertBeforeAfter(|cname,name,paramVar*)>b)
+  	where
+  		paramVar* := <map(extract-formal-vars)> param*
+  
+  extendMethodBody'(|cname):
+  	(_,_,d) -> d
+  
+  insertBeforeAfter(|cname,mname,var*):
+  	b -> Block([
+ 		ExprStm(Invoke(Method(MethodName(Id($[[mname]Before]))), var*)),
+  		Try(b, [], Block([
+  			ExprStm(Invoke(Method(MethodName(Id($[[mname]After]))), var*))
+  			])
+  		)
+    ])
+  	
+  // for around partial methods
+  separateMethodBody:
+  	MethodDec(h@MethodDecHead(annon,typeparam,retT,Id(name),params,throw),b) -> 
+  	[MethodDec(MethodDecHead(annon,typeparam,retT,Id($[[name]Body]),params,throw),b),
+  	MethodDec(h,b)]
+  
+  returnS(|lname):
+  	() -> $[throw new NoSuchLayerException([lname],this.getClass());]
+  
+  concatIfBranches:
+  	(b1,b2) -> $[[b1] else [b2]]
+  
+  genLayerCreater(|varlname):
+  	Layer(Id(lname),b*) -> $[if([varlname].equals("[lname]")) return new [lname]();]
+  
+  genActivationPcd:
+  	() -> $[pointcut pcActivation(): call(LayerManager LayerManager.activate(..));
+  	pointcut pcDeactivation(): call(LayerManager LayerManager.deactivate(..));]
+  
+  to-aspect:
+  	ClassDec(ClassDecHead(_, Id(name), _, _, _),body) -> 
+  	$[privileged aspect AspectFor[name]{
+  		[body']
+  	}]
+  	where
+  		body' := <to-aspect(|name)> body
+  		// activationPcds := <genActivationPcd>()
+  	

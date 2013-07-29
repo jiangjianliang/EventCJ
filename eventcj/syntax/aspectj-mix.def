@@ -1,0 +1,3201 @@
+definition
+module languages/aspectj/ajf/Keyword
+exports
+  context-free syntax
+    PrimPointcutName -> PointcutName {reject}
+
+module languages/aspectj/pointcut/Expression[Ctx JavaCtx]
+imports
+  languages/aspectj/common/BooleanComposition[PointcutExpr]
+
+exports
+  sorts PointcutExpr PrimPointcutName
+  context-free syntax
+    "call"      "(" MethodConstrPattern ")" -> PointcutExpr {cons("Call")}
+    "execution" "(" MethodConstrPattern ")" -> PointcutExpr {cons("Exec")}
+  lexical syntax
+    "call" | "execution" -> PrimPointcutName
+
+  context-free syntax
+    "initialization"       "(" ConstrPattern ")"    -> PointcutExpr {cons("InitExec")}
+    "preinitialization"    "(" ConstrPattern ")"    -> PointcutExpr {cons("PreInitExec")}
+    "staticinitialization" "(" TopTypePattern ")" -> PointcutExpr {cons("StaticInitExec")}
+  lexical syntax
+    "initialization" | "preinitialization" | "staticinitialization" -> PrimPointcutName
+
+  context-free syntax
+    "get" "(" FieldPattern ")" -> PointcutExpr {cons("GetField")}
+    "set" "(" FieldPattern ")" -> PointcutExpr {cons("SetField")}
+  lexical syntax
+    "get" | "set" -> PrimPointcutName
+
+  context-free syntax
+    "handler" "(" TopTypePattern ")" -> PointcutExpr {cons("Handler")}
+  lexical syntax
+    "handler" -> PrimPointcutName
+
+  context-free syntax
+    "adviceexecution" "(" ")" -> PointcutExpr {cons("AdviceExec")}
+  lexical syntax
+    "adviceexecution" -> PrimPointcutName
+
+  context-free syntax
+    "within"     "(" TopTypePattern ")" -> PointcutExpr {cons("Within")}
+    "withincode" "(" MethodConstrPattern ")" -> PointcutExpr {cons("WithinCode")}
+  lexical syntax
+    "within" | "withincode" -> PrimPointcutName
+
+  context-free syntax
+    "cflow"      "(" PointcutExpr ")" -> PointcutExpr {cons("CFlow")}
+    "cflowbelow" "(" PointcutExpr ")" -> PointcutExpr {cons("CFlowBelow")}
+  lexical syntax
+    "cflow" | "cflowbelow" -> PrimPointcutName
+
+  context-free syntax
+    "if" "(" Expr[[JavaCtx]] ")" -> PointcutExpr {cons("If")}
+  lexical syntax
+    "if" -> PrimPointcutName
+
+  context-free syntax
+    "this"    "("  TypeOrIdPattern       ")" -> PointcutExpr {cons("This")}
+    "target"  "("  TypeOrIdPattern       ")" -> PointcutExpr {cons("Target")}
+    "args"    "(" {TypeOrIdPattern ","}* ")" -> PointcutExpr {cons("Args")}
+   
+  lexical syntax
+    "this" | "target" | "args" -> PrimPointcutName
+
+  context-free syntax    
+    "@this"       "(" AnnoOrId ")" -> PointcutExpr {cons("AtThis")}
+    "@target"     "(" AnnoOrId ")" -> PointcutExpr {cons("AtTarget")}
+    "@within"     "(" AnnoOrId ")" -> PointcutExpr {cons("AtWithin")}
+    "@withincode" "(" AnnoOrId ")" -> PointcutExpr {cons("AtWithinCode")}
+    "@annotation" "(" AnnoOrId ")" -> PointcutExpr {cons("AtAnno")}
+    "@args" "(" {AnnoOrIdPattern ","}* ")" -> PointcutExpr {cons("AtArgs")}
+   
+  context-free syntax
+    PointcutName "(" {TypeOrIdPattern ","}* ")" -> PointcutExpr {cons("NamedPointcut")}
+
+  sorts PointcutName
+  context-free syntax
+    Id[[Ctx]]                                 -> PointcutName {cons("PointcutName")}
+    ClassOrInterfaceType[[Ctx]] "." Id[[Ctx]] -> PointcutName {cons("PointcutName")}
+
+  sorts AnnoOrId AnnoOrIdPattern TypeOrIdPattern
+  context-free syntax
+    TypeName[[Ctx]] -> AnnoOrId
+    "*"      -> AnnoOrIdPattern {cons("Wildcard")}
+    ".."     -> AnnoOrIdPattern {cons("DotWildcard")}
+    AnnoOrId -> AnnoOrIdPattern
+ 
+    "*"             -> TypeOrIdPattern {cons("Wildcard")}
+    ".."            -> TypeOrIdPattern {cons("DotWildcard")}
+    Type[[Ctx]]     -> TypeOrIdPattern
+    Type[[Ctx]] "+" -> TypeOrIdPattern {cons("Subtype")}
+
+
+  lexical restrictions
+    "adviceexecution"
+    "args"
+    "call"
+    "cflow"
+    "cflowbelow"
+    "error"
+    "execution"
+    "get"
+    "handler"
+    "initialization"
+    "parents"
+    "precedence"
+    "preinitialization"
+    "returning"
+    "set"
+    "soft"
+    "staticinitialization"
+    "target"
+    "throwing"
+    "warning"
+    "within"
+    "withincode"
+      -/- [A-Za-z0-9\_\$]
+
+module languages/aspectj/pointcut/Declaration[Ctx]
+exports
+  sorts
+    PointcutDec
+    PointcutDecBody
+    PointcutDecHead
+
+  context-free syntax
+    PointcutDecHead PointcutBody -> PointcutDec {cons("PointcutDec")}
+
+    %%%
+     %% @todo What modifiers are allowed for a pointcut?
+     %%%
+    (Anno[[Ctx]] | Modifier[[Ctx]])* "pointcut" Id[[Ctx]] "(" {FormalParam[[Ctx]] ","}* ")"
+      -> PointcutDecHead {cons("PointcutDecHead")}
+
+    ":" PointcutExpr ";" -> PointcutBody {cons("PointcutBody")}
+                     ";" -> PointcutBody {cons("NoPointcutBody")}
+
+module languages/aspectj/pattern/Annotation[Ctx]
+exports
+  sorts
+    AnnoPattern
+    SimpleAnnoPattern
+
+  context-free syntax
+    "@" "(" TypePattern ")" -> SimpleAnnoPattern {cons("SimpleAnnoPattern")}
+    "@" TypeName[[Ctx]]     -> SimpleAnnoPattern {cons("SimpleAnnoPatternExact")}
+    "!" SimpleAnnoPattern   -> NotSimpleAnnoPattern {cons("Not")}
+
+    (SimpleAnnoPattern | NotSimpleAnnoPattern)* -> AnnoPattern {cons("AnnoPattern")}
+    (SimpleAnnoPattern | NotSimpleAnnoPattern)+ -> AnnoPatternPlus {cons("AnnoPattern")}
+
+module languages/aspectj/pattern/Type[Ctx]
+imports
+  languages/aspectj/common/BooleanComposition[TypePattern]
+  languages/aspectj/pattern/Name[Ctx]
+  languages/java/JavaMix[PlainJavaTheCtx]
+
+exports
+  sorts
+    TopTypePattern      
+    TypePattern
+    TypeParamsPattern
+    TypeParamPattern
+    TypeBoundPattern
+    
+  context-free syntax
+    TypeDecSpecPattern -> BaseTypePattern {cons("RefTypePattern")}
+    PrimType[[Ctx]]    -> BaseTypePattern {cons("PrimTypePattern")}
+
+    BaseTypePattern  -> TypePattern
+    "void"           -> TypePattern {cons("Void")}
+    TypePattern "[]" -> TypePattern {cons("ArrayType")}
+    "?"              -> TypePattern {cons("Wildcard")}
+
+  context-free syntax
+    NamePattern     -> TypeDecSpecPattern
+    NamePattern "+" -> TypeDecSpecPattern {cons("Subtype")}
+
+    TypeDecSpecPattern TypeParamsPattern -> TypePattern {cons("GenericTypePattern")}
+    NamePattern        TypeParamsPattern "+" -> TypePattern {cons("GenericSubtypePattern")}
+
+    "(" AnnoPatternPlus TypePattern ")" -> TypePattern {cons("AnnoTypePattern")}
+
+    AnnoPatternPlus TypePattern -> TopTypePattern {cons("AnnoTypePattern")}
+    TypePattern                 -> TopTypePattern
+
+  context-free syntax
+
+  context-free syntax
+    TypePattern TypeBoundPattern?      -> TypeParamPattern  {cons("TypeParam")}
+    "<" {TypeParamPattern ","}+ ">"    -> TypeParamsPattern {cons("TypeParams")}
+    
+    "extends" {TypePattern "&"}+       -> TypeBoundPattern  {cons("WildcardUpperBound")}
+    "super"   {TypePattern "&"}+       -> TypeBoundPattern  {cons("WildcardLowerBound")}
+
+  %%%
+   %% Void, int are valid name patterns, so they should be reject as type patterns.
+   %%%
+  context-free syntax
+    Keyword[[PlainJavaTheCtx]] -> TypeDecSpecPattern {reject}
+
+module languages/aspectj/pattern/Name[Ctx]
+exports
+  sorts NamePattern
+  context-free syntax
+    IdPattern                  -> NamePattern {cons("NamePattern")}
+    NamePattern "."  IdPattern -> NamePattern {cons("NamePattern")} 
+    NamePattern ".." IdPattern -> NamePattern {cons("WildcardNamePattern")} 
+
+  sorts IdPattern
+  lexical syntax	
+    [a-zA-Z\_\$\*][a-zA-Z0-9\_\$\*]* -> IdPattern
+
+  lexical restrictions 	 
+    IdPattern -/- [a-zA-Z0-9\_\$\*]
+
+module languages/aspectj/pattern/FormalParameter[Ctx]
+exports
+
+  %% @todo The FormalWildcard could produce a list. Does implode allow this?
+  sorts FormalParam
+  context-free syntax
+    ".."              -> FormalPattern {cons("FormalWildcard")}
+    TypePattern       -> FormalPattern
+    TypePattern "..." -> FormalPattern {cons("VarArityParamPattern")}
+
+module languages/aspectj/common/BooleanComposition[E]
+exports
+  context-free syntax
+    "(" E ")" -> E {bracket}
+    "!" E     -> E {cons("NotComp")}
+    E "&&" E  -> E {left, cons("AndComp")}
+    E "||" E  -> E {left, cons("OrComp")}
+
+  context-free priorities
+    "!" E    -> E
+  > E "&&" E -> E
+  > E "||" E -> E
+
+
+module languages/aspectj/pattern/ClassName[Ctx]
+imports
+  languages/aspectj/common/BooleanComposition[ClassNamePattern]
+
+exports
+  sorts ClassNamePattern
+  context-free syntax
+    NamePattern                   -> ClassNamePattern {cons("SimpleNamePattern")}
+    NamePattern TypeParamsPattern -> ClassNamePattern {cons("Generic")}
+
+    NamePattern "+"                   -> ClassNamePattern {cons("Subtype")}
+    NamePattern "+" TypeParamsPattern -> ClassNamePattern {cons("Subtype")}
+    NamePattern TypeParamsPattern "+" -> ClassNamePattern {cons("Subtype")}
+
+module languages/aspectj/pattern/ClassMember[Ctx]
+imports
+  languages/aspectj/pattern/ClassName[Ctx]
+  languages/aspectj/pattern/FormalParameter[Ctx]
+  languages/aspectj/pattern/Type[Ctx]
+
+exports
+  sorts
+    MethodConstrPattern
+    MethodPattern
+    ConstrPattern
+
+  context-free syntax
+    AnnoPattern MethodModPattern TypePattern ClassMemberNamePattern "(" {FormalPattern ","}* ")" ThrowsPattern? -> MethodPattern {cons("MethodPattern")}
+    AnnoPattern ConstrModPattern             ConstrNamePattern      "(" {FormalPattern ","}* ")" ThrowsPattern? -> ConstrPattern {cons("ConstrPattern")}
+
+    MethodPattern -> MethodConstrPattern
+    ConstrPattern -> MethodConstrPattern
+
+  sorts FieldPattern
+  context-free syntax
+    AnnoPattern FieldModPattern TypePattern ClassMemberNamePattern -> FieldPattern {cons("FieldPattern")}
+
+  %%%
+   %% @todo Parenthesized type pattern
+   %%%
+  sorts
+    ClassMemberNamePattern
+    ConstrNamePattern
+  context-free syntax
+                     IdPattern -> ClassMemberNamePattern {cons("MemberName")}
+    TypePattern "."  IdPattern -> ClassMemberNamePattern {cons("MemberName")}
+    TypePattern ".." IdPattern -> ClassMemberNamePattern {cons("WildcardMemberName")}
+
+                     "new" -> ConstrNamePattern      {cons("ConstrName")}
+    TypePattern "."  "new" -> ConstrNamePattern      {cons("ConstrName")}
+    TypePattern ".." "new" -> ConstrNamePattern      {cons("WildcardConstrName")}
+
+  sorts
+    MethodModPattern
+    ConstrModPattern
+    FieldModPattern
+  context-free syntax
+    "!" MethodMod[[Ctx]] -> NotMethodMod {cons("Not")}
+    "!" FieldMod[[Ctx]]  -> NotFieldMod  {cons("Not")}
+    "!" ConstrMod[[Ctx]] -> NotConstrMod {cons("Not")}
+
+    (MethodMod[[Ctx]] | NotMethodMod)* -> MethodModPattern {cons("ModPattern")}
+    (ConstrMod[[Ctx]] | NotConstrMod)* -> ConstrModPattern {cons("ModPattern")}
+    (FieldMod[[Ctx]]  | NotFieldMod )* -> FieldModPattern  {cons("ModPattern")}
+
+  sorts ThrowsPattern ExceptionPattern
+  context-free syntax
+    "throws" {ExceptionPattern ","}+ -> ThrowsPattern {cons("ThrowsPattern")}
+
+    %% a top-level not binds weaker than other nots.
+    "!" ClassNamePattern -> ExceptionPattern {cons("NotThrowsCondition"), prefer}
+    ClassNamePattern     -> ExceptionPattern {cons("ThrowsCondition")}
+
+  sorts ElementPattern
+  context-free syntax
+    MethodConstrPattern -> ElementPattern
+            TypePattern -> ElementPattern
+           FieldPattern -> ElementPattern
+    
+
+
+module languages/aspectj/pattern/Main[Ctx]
+imports
+  languages/aspectj/pattern/ClassMember[Ctx]
+  languages/aspectj/pattern/ClassName[Ctx]
+  languages/aspectj/pattern/FormalParameter[Ctx]
+  languages/aspectj/pattern/Name[Ctx]
+  languages/aspectj/pattern/Type[Ctx]
+  languages/aspectj/pattern/Annotation[Ctx]
+
+
+module languages/aspectj/aspect/IntertypeMemberDeclaration[Ctx]
+exports
+  sorts IntertypeMemberDec
+
+  %%%
+   %% Intertype method declaration
+   %%%
+  context-free syntax
+    IntertypeMethodDecHead MethodBody[[Ctx]] -> IntertypeMemberDec {cons("IntertypeMethodDec")}
+
+    (Anno[[Ctx]] | MethodMod[[Ctx]])* TypeParams[[Ctx]]? ResultType[[Ctx]]
+      TypeName[[Ctx]] TypeParams[[Ctx]]? "." Id[[Ctx]] "(" {FormalParam[[Ctx]] ","}* ")" Throws[[Ctx]]?
+      -> IntertypeMethodDecHead {cons("IntertypeMethodDecHead")}
+
+  %%%
+   %% Intertype constructor declaration
+   %%%
+  context-free syntax
+    IntertypeConstrDecHead ConstrBody[[Ctx]] -> IntertypeMemberDec {cons("IntertypeConstrDec")}
+
+    (Anno[[Ctx]] | ConstrMod[[Ctx]])* TypeParams[[Ctx]]?
+      TypeName[[Ctx]] TypeParams[[Ctx]]? "."
+      "new" "(" {FormalParam[[Ctx]] ","}* ")" Throws[[Ctx]]?
+      -> IntertypeConstrDecHead {cons("IntertypeConstrDecHead")}
+
+  %%%
+   %% Intertype field declaration
+   %%
+   %% @todo This will allow dimensions after the identifier, which is not
+   %%        supported by AspectJ.
+   %%%
+  context-free syntax
+    (Anno[[Ctx]] | FieldMod[[Ctx]])* Type[[Ctx]] TypeName[[Ctx]] TypeParams[[Ctx]]? "." VarDec[[Ctx]] ";"
+      -> IntertypeMemberDec {cons("IntertypeFieldDec")}
+
+module languages/aspectj/aspect/AdviceDeclaration[Ctx]
+exports
+  sorts AdviceDec AdviceMod
+  context-free syntax
+    AdviceMod* AdviceSpec Throws[[Ctx]]? ":" PointcutExpr MethodBody[[Ctx]] -> AdviceDec {cons("AdviceDec")}
+
+    StrictFP[[Ctx]] -> AdviceMod
+    Anno[[Ctx]]     -> AdviceMod
+
+  sorts AdviceSpec
+  context-free syntax
+    "before" "(" {FormalParam[[Ctx]] ","}* ")"             -> AdviceSpec {cons("Before")}
+    "after"  "(" {FormalParam[[Ctx]] ","}* ")" ExitStatus? -> AdviceSpec {cons("After")}
+
+    ResultType[[Ctx]] "around" "(" {FormalParam[[Ctx]] ","}* ")" -> AdviceSpec {cons("Around")}
+
+    "returning"                            -> ExitStatus {cons("Returning")}
+    "returning" "("                    ")" -> ExitStatus {cons("Returning")}
+    "returning" "(" FormalParam[[Ctx]] ")" -> ExitStatus {cons("Returning")}
+
+    "throwing"                             -> ExitStatus {cons("Throwing")}
+    "throwing"  "("                    ")" -> ExitStatus {cons("Throwing")}
+    "throwing"  "(" FormalParam[[Ctx]] ")" -> ExitStatus {cons("Throwing")}
+
+module languages/aspectj/aspect/DeclareDeclaration[Ctx PointcutCtx]
+exports
+  sorts DeclareDec
+  context-free syntax
+    Anno[[Ctx]]* "declare" "parents" ":" TopTypePattern Parent ";"
+      -> DeclareDec {cons("DecParent")}
+
+    Anno[[Ctx]]* "declare" "warning" ":" PointcutExpr ":" StringLiteral[[PointcutCtx]] ";"
+      -> DeclareDec {cons("DecWarning")}
+
+    Anno[[Ctx]]* "declare" "error" ":" PointcutExpr ":" StringLiteral[[PointcutCtx]] ";"
+      -> DeclareDec {cons("DecError")}
+
+    Anno[[Ctx]]* "declare" "soft" ":" Type[[PointcutCtx]] ":" PointcutExpr ";"
+      -> DeclareDec {cons("DecSoft")}
+      
+    %% Strange parenthesis in ajc testsuite ....
+    Anno[[Ctx]]* "declare" "soft" ":" "(" Type[[PointcutCtx]] ")" ":" PointcutExpr ";"
+      -> DeclareDec {cons("DecSoft")}
+
+    Anno[[Ctx]]* "declare" "precedence" ":" {TopTypePattern ","}+ ";"
+      -> DeclareDec {cons("DecPrecedence")}
+
+    Anno[[Ctx]]* "declare" AnnoDeclKind ":" ElementPattern ":" Anno[[AspectCtx]] ";"
+      -> DeclareDec {cons("DecAnno")}
+
+  sorts AnnoDeclKind
+  context-free syntax
+           "@type" -> AnnoDeclKind {cons("DecAnnoType")}
+    "@constructor" -> AnnoDeclKind {cons("DecAnnoConstructor")}
+         "@method" -> AnnoDeclKind {cons("DecAnnoMethod")}
+          "@field" -> AnnoDeclKind {cons("DecAnnoField")}
+
+  sorts Parent
+  context-free syntax
+    Super[[PointcutCtx]]             -> Parent
+    Interfaces[[PointcutCtx]]        -> Parent
+    
+    %%%
+     %% Undocumented feature (AspectJ guide) : add interfaces with extends.
+     %%%
+    ExtendsInterfaces[[PointcutCtx]] -> Parent {avoid}
+
+module languages/aspectj/aspect/BodyDeclaration[Ctx]
+imports
+  languages/aspectj/aspect/DeclareDeclaration[Ctx]
+  languages/aspectj/aspect/AdviceDeclaration[Ctx]
+  languages/aspectj/aspect/IntertypeMemberDeclaration[Ctx]
+
+exports
+  sorts AspectBodyDec
+  context-free syntax
+    ClassBodyDec[[Ctx]] -> AspectBodyDec
+    DeclareDec          -> AspectBodyDec 
+    AdviceDec           -> AspectBodyDec
+    IntertypeMemberDec  -> AspectBodyDec
+
+    AspectDec           -> ClassMemberDec[[Ctx]]
+    PointcutDec         -> ClassMemberDec[[Ctx]]
+
+
+module languages/aspectj/aspect/Declaration[Ctx JavaCtx]
+imports
+  languages/aspectj/aspect/BodyDeclaration[Ctx]
+
+exports
+  sorts AspectDec
+  context-free syntax
+    AspectDecHead AspectBody -> AspectDec {cons("AspectDec")}
+
+    (Anno[[Ctx]] | AspectMod)* "aspect" Id[[Ctx]] TypeParams[[Ctx]]? Super[[Ctx]]? Interfaces[[Ctx]]? PerClause?
+      -> AspectDecHead {cons("AspectDecHead")}
+
+  sorts PerClause
+  context-free syntax
+    "pertarget"     "(" PointcutExpr ")" -> PerClause {cons("PerTarget")}
+    "perthis"       "(" PointcutExpr ")" -> PerClause {cons("PerThis")}
+    "percflow"      "(" PointcutExpr ")" -> PerClause {cons("PerCFlow")}
+    "percflowbelow" "(" PointcutExpr ")" -> PerClause {cons("PerCFlowBelow")}
+    "pertypewithin" "(" TypePattern ")"  -> PerClause {cons("PerTypeWithin")}
+    "issingleton"                        -> PerClause {cons("IsSingleton")}
+    "issingleton" "(" ")"                -> PerClause {cons("IsSingleton")}
+
+  sorts AspectBody
+  context-free syntax
+    "{" AspectBodyDec* "}" -> AspectBody {cons("AspectBody")}
+
+  %% todo: which modifiers are allowed?
+  sorts AspectMod
+  context-free syntax
+    ClassMod[[JavaCtx]] -> AspectMod
+    "privileged"        -> AspectMod {cons("Privileged")}
+
+module languages/aspectj/lexical/Keyword
+exports
+  lexical restrictions
+    "privileged"
+    "aspect"
+    "after"
+    "around"
+    "before"
+    "declare"
+    "issingleton"
+    "percflow"
+    "percflowbelow"
+    "pertarget"
+    "perthis"
+    "pointcut"
+      -/- [A-Za-z0-9\_\$]
+
+module languages/java-15/expressions/Priorities
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/expressions/Main
+
+exports
+  context-free priorities
+      Expr "." "new" TypeArgs? Id TypeArgs? "(" {Expr ","}* ")" ClassBody? -> Expr
+    > {right:
+        Expr "++" -> Expr
+        Expr "--" -> Expr
+      } 
+
+  context-free priorities
+      {right:
+        Expr "++" -> Expr
+        Expr "--" -> Expr
+      }
+    > { "(" PrimType ")" Expr -> Expr    
+        "(" RefType  ")" Expr -> Expr
+      }
+
+  context-free priorities
+      "(" PrimType ")" Expr -> Expr
+    > {left:
+        Expr "*" Expr -> Expr
+        Expr "/" Expr -> Expr
+        Expr "%" Expr -> Expr
+      } 
+
+  context-free priorities
+      "(" RefType ")" Expr -> Expr 
+    > {
+        "++" Expr -> Expr
+        "--" Expr -> Expr
+        "+"  Expr -> Expr
+        "-"  Expr -> Expr
+      }
+
+  context-free priorities
+    {
+      Expr ArraySubscript -> ArrayAccess
+      Expr "." Id -> FieldAccess
+      Expr "." TypeArgs? Id -> MethodSpec
+    }
+  > {right:
+      Expr "++" -> Expr
+      Expr "--" -> Expr
+    }
+  > {
+      "++" Expr -> Expr
+      "--" Expr -> Expr
+      "+"  Expr -> Expr
+      "-"  Expr -> Expr
+      "~"  Expr -> Expr
+      "!"  Expr -> Expr
+    }
+  > {left:
+      Expr "*" Expr -> Expr
+      Expr "/" Expr -> Expr
+      Expr "%" Expr -> Expr
+    } 
+  > {left:
+      Expr "+" Expr -> Expr
+      Expr "-" Expr -> Expr
+    }
+  > {left:
+      Expr "<<"  Expr -> Expr
+      Expr ">>"  Expr -> Expr
+      Expr ">>>" Expr -> Expr
+    }
+  > {left:
+      Expr "instanceof" RefType -> Expr
+      Expr "<"   Expr -> Expr
+      Expr ">"   Expr -> Expr
+      Expr "<="  Expr -> Expr
+      Expr ">="  Expr -> Expr
+    }
+  > {left:
+      Expr "=="  Expr -> Expr
+      Expr "!="  Expr -> Expr
+    }
+  >   Expr "&"   Expr -> Expr
+  >   Expr "^"   Expr -> Expr
+  >   Expr "|"   Expr -> Expr
+  >   Expr "&&"  Expr -> Expr
+  >   Expr "||"  Expr -> Expr
+  >   Expr CondMid Expr -> Expr
+  > {right:
+      LHS "="    Expr -> Expr
+      LHS "*="   Expr -> Expr
+      LHS "/="   Expr -> Expr
+      LHS "%="   Expr -> Expr
+      LHS "+="   Expr -> Expr
+      LHS "-="   Expr -> Expr
+      LHS "<<="  Expr -> Expr
+      LHS ">>="  Expr -> Expr
+      LHS ">>>=" Expr -> Expr
+      LHS "&="   Expr -> Expr
+      LHS "^="   Expr -> Expr
+      LHS "|="   Expr -> Expr
+    }
+
+module languages/java-15/expressions/Restrictions
+exports
+  lexical restrictions
+    "+" -/- [\+]
+    "-" -/- [\-]
+    "/" -/- [\/]
+
+module languages/java-15/expressions/AssignmentOperators
+imports
+  languages/java-15/expressions/Main
+
+exports
+  sorts LHS
+  context-free syntax
+    LHS "="    Expr -> Expr {cons("Assign")}
+    LHS "*="   Expr -> Expr {cons("AssignMul")}
+    LHS "/="   Expr -> Expr {cons("AssignDiv")}
+    LHS "%="   Expr -> Expr {cons("AssignRemain")}
+    LHS "+="   Expr -> Expr {cons("AssignPlus")}
+    LHS "-="   Expr -> Expr {cons("AssignMinus")}
+    LHS "<<="  Expr -> Expr {cons("AssignLeftShift")}
+    LHS ">>="  Expr -> Expr {cons("AssignRightShift")}
+    LHS ">>>=" Expr -> Expr {cons("AssignURightShift")}
+    LHS "&="   Expr -> Expr {cons("AssignAnd")}
+    LHS "^="   Expr -> Expr {cons("AssignExcOr")}
+    LHS "|="   Expr -> Expr {cons("AssignOr")}
+
+    ExprName    -> LHS
+    FieldAccess -> LHS
+    ArrayAccess -> LHS
+
+
+
+
+module languages/java-15/expressions/BinaryOperators
+imports
+  languages/java-15/expressions/Main
+  languages/java-15/types/Main
+
+exports
+  sorts CondMid
+  context-free syntax
+    Expr "instanceof" RefType -> Expr {cons("InstanceOf")}
+
+    Expr "*"   Expr -> Expr  {left, cons("Mul")}
+    Expr "/"   Expr -> Expr  {left, cons("Div")}
+    Expr "%"   Expr -> Expr  {left, cons("Remain")}
+
+    Expr "+"   Expr -> Expr  {left, cons("Plus")}
+    Expr "-"   Expr -> Expr  {left, cons("Minus")}
+
+    Expr "<<"  Expr -> Expr  {left, cons("LeftShift")}
+    Expr ">>"  Expr -> Expr  {left, cons("RightShift")}
+    Expr ">>>" Expr -> Expr  {left, cons("URightShift")}
+
+    Expr "<"   Expr -> Expr  {left, cons("Lt")}
+    Expr ">"   Expr -> Expr  {left, cons("Gt")}
+    Expr "<="  Expr -> Expr  {left, cons("LtEq")}
+    Expr ">="  Expr -> Expr  {left, cons("GtEq")}
+    Expr "=="  Expr -> Expr  {left, cons("Eq")}
+    Expr "!="  Expr -> Expr  {left, cons("NotEq")}
+
+    Expr "&&"  Expr -> Expr  {left, cons("LazyAnd")}
+    Expr "||"  Expr -> Expr  {left, cons("LazyOr")}
+
+    Expr "&" Expr -> Expr {left, cons("And")}
+    Expr "^" Expr -> Expr {left, cons("ExcOr")}
+    Expr "|" Expr -> Expr {left, cons("Or")}
+
+    %% todo JFR-30
+    Expr CondMid Expr -> Expr {right, cons("Cond")}
+    "?" Expr ":" -> CondMid {bracket}
+
+module languages/java-15/expressions/UnaryOperators
+imports 
+  languages/java-15/expressions/Main
+exports
+  context-free syntax
+    "+" Expr -> Expr {cons("Plus")}
+    "-" Expr -> Expr {cons("Minus")}
+
+    "++" Expr -> Expr {cons("PreIncr")}
+    "--" Expr -> Expr {cons("PreDecr")}
+
+    "~" Expr -> Expr {cons("Complement")}
+    "!" Expr -> Expr {cons("Not")}
+
+    "(" PrimType ")" Expr -> Expr {cons("CastPrim")}
+    "(" RefType  ")" Expr -> Expr {cons("CastRef")}
+
+module languages/java-15/expressions/Postfix
+imports 
+  languages/java-15/expressions/Main
+
+exports
+  context-free syntax
+    ExprName  -> Expr
+    Expr "++" -> Expr {cons("PostIncr")}
+    Expr "--" -> Expr {cons("PostDecr")}
+
+module languages/java-15/expressions/MethodInvocation
+imports
+  languages/java-15/expressions/Main
+
+exports
+  sorts MethodSpec
+  context-free syntax
+    MethodSpec "(" {Expr ","}* ")" -> Expr {cons("Invoke")}
+
+                               MethodName -> MethodSpec {cons("Method")}
+                    Expr "." TypeArgs? Id -> MethodSpec {cons("Method")}
+                 "super" "." TypeArgs? Id -> MethodSpec {cons("SuperMethod")}
+    TypeName "." "super" "." TypeArgs? Id -> MethodSpec {cons("QSuperMethod")}
+                 AmbName "." TypeArgs  Id -> MethodSpec {cons("GenericMethod")}
+
+  %% This priority forbids a Expr "." MethodSpec if the expression is a plain ExprName.
+  %% This solves an ambiguity with the MethodName and AmbName . TypeArgs MethodSpecs.
+  %% foo.bar.fred() results in a MethodName MethodSpec.
+  %% (foo.bar).fred() results in the Expr. MethodSpec
+  %% foo.bar.<T>fred() results in a GenericMethod
+  context-free priorities
+      Expr "." TypeArgs? Id -> MethodSpec
+    > ExprName  -> Expr
+
+
+
+
+module languages/java-15/expressions/ArrayAccess
+imports
+  languages/java-15/expressions/Main
+exports
+  sorts
+    ArrayAccess
+    ArraySubscript
+
+  context-free syntax
+    ArrayAccess -> Expr
+
+    %% todo: JFR-29
+    Expr ArraySubscript -> ArrayAccess {cons("ArrayAccess")}
+    "[" Expr "]" -> ArraySubscript {bracket}
+
+    ArrayCreationExpr ArraySubscript -> ArrayAccess {reject}
+
+module languages/java-15/expressions/FieldAccess
+imports
+  languages/java-15/expressions/Main
+
+exports
+  sorts FieldAccess
+  context-free syntax
+    FieldAccess -> Expr
+
+  context-free syntax
+
+                    Expr "." Id -> FieldAccess {cons("Field")}
+                ExprName "." Id -> FieldAccess {reject}
+                 "super" "." Id -> FieldAccess {cons("SuperField")}
+    TypeName "." "super" "." Id -> FieldAccess {cons("QSuperField")}
+
+module languages/java-15/expressions/ArrayCreation
+imports
+  languages/java-15/expressions/Main
+
+exports
+  sorts
+    ArrayCreationExpr
+    ArrayBaseType
+    Dim
+    DimExpr
+
+  context-free syntax
+    ArrayCreationExpr     -> Expr
+
+    "new" ArrayBaseType DimExpr+ Dim*  -> ArrayCreationExpr {cons("NewArray")}
+    "new" ArrayBaseType Dim+ ArrayInit -> ArrayCreationExpr {cons("NewArray")}
+
+    PrimType -> ArrayBaseType
+    TypeName -> ArrayBaseType
+    TypeName "<" "?" ">" -> ArrayBaseType {cons("UnboundWld")}
+
+    "[" Expr "]" -> DimExpr {cons("Dim")}
+    "[" "]"      -> Dim     {cons("Dim")}
+
+module languages/java-15/expressions/ClassInstanceCreation
+imports
+  languages/java-15/expressions/Main
+  languages/java-15/classes/ClassDeclarations
+
+exports
+  context-free syntax
+
+             "new" TypeArgs? ClassOrInterfaceType "(" {Expr ","}* ")" ClassBody? -> Expr {cons("NewInstance")}
+    Expr "." "new" TypeArgs? Id         TypeArgs? "(" {Expr ","}* ")" ClassBody? -> Expr {cons("QNewInstance")}
+
+module languages/java-15/expressions/Primary
+imports
+  languages/java-15/lexical/literals/Main
+  languages/java-15/names/Main
+  languages/java-15/expressions/Main
+
+exports
+  %%%
+   %% Section 15.8.1: Lexical Literals
+   %%%
+  sorts Literal
+  context-free syntax
+    Literal -> Expr {cons("Lit")}
+
+    IntLiteral    -> Literal
+    FloatLiteral  -> Literal
+    BoolLiteral   -> Literal 
+    CharLiteral   -> Literal
+    StringLiteral -> Literal
+    NullLiteral   -> Literal
+
+  %%%
+   %% Section 15.8.2: Class Literals
+   %%%
+  sorts ClassLiteral
+  context-free syntax
+    ClassLiteral -> Literal
+    Type   "." "class" -> ClassLiteral {cons("Class")}
+    "void" "." "class" -> ClassLiteral {cons("VoidClass")}
+
+  %%%
+   %% Section 15.8.3/4: (Qualified this)
+   %%%
+  context-free syntax
+                 "this" -> Expr {cons("This")}
+    TypeName "." "this" -> Expr {cons("QThis")}
+
+  %%%
+   %% Section 15.8.5: Parenthesized Expression
+   %%%
+  context-free syntax
+    "(" Expr ")"          -> Expr {bracket}
+
+module languages/java-15/expressions/Main
+imports
+  languages/java-15/expressions/Primary
+  languages/java-15/expressions/ClassInstanceCreation
+  languages/java-15/expressions/ArrayCreation
+  languages/java-15/expressions/FieldAccess
+  languages/java-15/expressions/ArrayAccess
+  languages/java-15/expressions/MethodInvocation
+  languages/java-15/expressions/Postfix
+  languages/java-15/expressions/UnaryOperators
+  languages/java-15/expressions/BinaryOperators
+  languages/java-15/expressions/AssignmentOperators
+  languages/java-15/expressions/Restrictions
+  languages/java-15/expressions/Priorities
+
+exports
+  sorts
+    Expr
+
+module languages/java-15/statements/Main
+imports
+  languages/java-15/statements/Blocks
+  languages/java-15/statements/LocalVariableDeclarations
+  languages/java-15/statements/Statements
+
+
+
+
+module languages/java-15/arrays/Main
+imports
+  languages/java-15/arrays/ArrayInitializers
+
+
+
+
+module languages/java-15/interfaces/Main
+imports
+  languages/java-15/interfaces/InterfaceDeclarations
+  languages/java-15/interfaces/AbstractMethodDeclarations
+  languages/java-15/interfaces/AnnotationTypes
+  languages/java-15/interfaces/Annotations
+
+
+
+
+module languages/java-15/classes/Main
+imports
+  languages/java-15/classes/ClassDeclarations
+  languages/java-15/classes/EnumDeclarations
+
+
+
+
+module languages/java-15/packages/PackageDeclarations
+imports
+  languages/java-15/names/Main
+  languages/java-15/interfaces/Annotations
+
+exports
+  sorts
+    PackageDec
+
+  context-free syntax
+    Anno* "package" PackageName ";" -> PackageDec {cons("PackageDec")}
+
+module languages/java-15/packages/ImportDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/names/Main
+
+exports
+  sorts
+    ImportDec
+
+  context-free syntax
+    "import" TypeName                  ";"  -> ImportDec {cons("TypeImportDec")}
+    "import" PackageName       "." "*" ";"  -> ImportDec {cons("TypeImportOnDemandDec")}
+    "import" "static" TypeName "." Id  ";"  -> ImportDec {cons("StaticImportDec")}
+    "import" "static" TypeName "." "*" ";"  -> ImportDec {cons("StaticImportOnDemandDec")}
+
+module languages/java-15/interfaces/AnnotationTypes
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/classes/ClassDeclarations
+  languages/java-15/classes/EnumDeclarations
+  languages/java-15/interfaces/InterfaceDeclarations
+  languages/java-15/interfaces/AbstractMethodDeclarations
+  languages/java-15/interfaces/ConstantDeclarations
+  languages/java-15/interfaces/Annotations
+
+exports
+  sorts
+    AnnoDec
+    AnnoDecHead
+
+  context-free syntax
+    AnnoDecHead "{" AnnoElemDec* "}" -> AnnoDec {cons("AnnoDec")}
+    (Anno | InterfaceMod)* "@" "interface" Id -> AnnoDecHead {cons("AnnoDecHead")}
+
+  sorts
+    AnnoElemDec
+    DefaultVal
+
+  context-free syntax
+    AbstractMethodMod* Type Id "(" ")" DefaultVal? ";" -> AnnoElemDec {cons("AnnoMethodDec")}
+
+    ConstantDec  -> AnnoElemDec
+    ClassDec     -> AnnoElemDec
+    InterfaceDec -> AnnoElemDec
+    EnumDec      -> AnnoElemDec
+    AnnoDec      -> AnnoElemDec
+    ";"          -> AnnoElemDec {cons("Semicolon")}
+
+    "default" ElemVal -> DefaultVal {cons("DefaultVal")}
+
+module languages/java-15/interfaces/AbstractMethodDeclarations
+imports
+  languages/java-15/lexical/Modifiers
+  languages/java-15/names/Main
+  languages/java-15/types/Main
+  languages/java-15/classes/MethodDeclarations
+
+exports
+  sorts
+    AbstractMethodDec
+    AbstractMethodMod
+
+  context-free syntax
+    (Anno | AbstractMethodMod)* TypeParams? ResultType
+      Id "(" {FormalParam ","}* ")" Throws? ";" -> AbstractMethodDec {cons("AbstractMethodDec")}
+
+    (Anno | AbstractMethodMod)* TypeParams? ResultType
+      Id "(" {FormalParam ","}* ")" Dim+ Throws? ";" -> AbstractMethodDec {cons("DeprAbstractMethodDec")}
+
+    Public   -> AbstractMethodMod
+    Abstract -> AbstractMethodMod
+
+
+
+
+
+module languages/java-15/interfaces/ConstantDeclarations
+imports
+  languages/java-15/lexical/Modifiers
+  languages/java-15/types/Main
+  languages/java-15/classes/MethodDeclarations
+  languages/java-15/interfaces/Annotations
+
+exports
+  sorts
+    ConstantDec
+    ConstantMod
+
+  context-free syntax
+    (Anno | ConstantMod)* Type {VarDec ","}+ ";" -> ConstantDec {cons("ConstantDec")}
+
+    Public -> ConstantMod
+    Static -> ConstantMod
+    Final  -> ConstantMod
+
+
+
+
+module languages/java-15/interfaces/InterfaceDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Modifiers
+  languages/java-15/names/Main
+  languages/java-15/types/Main
+  languages/java-15/classes/ClassDeclarations
+  languages/java-15/classes/MethodDeclarations
+  languages/java-15/interfaces/ConstantDeclarations
+  languages/java-15/interfaces/AbstractMethodDeclarations
+  languages/java-15/interfaces/AnnotationTypes
+  languages/java-15/interfaces/Annotations
+
+exports
+  sorts
+    InterfaceDec
+    InterfaceDecHead
+    ExtendsInterfaces
+    InterfaceMemberDec
+    InterfaceMod
+
+  context-free syntax
+    AnnoDec -> InterfaceDec
+
+    InterfaceDecHead "{" InterfaceMemberDec* "}" -> InterfaceDec {cons("InterfaceDec")}
+
+    (Anno | InterfaceMod)* "interface" Id TypeParams? ExtendsInterfaces? -> InterfaceDecHead {cons("InterfaceDecHead")}
+    "extends" {InterfaceType ","}+ -> ExtendsInterfaces {cons("ExtendsInterfaces")}
+
+  context-free syntax
+    ConstantDec       -> InterfaceMemberDec
+    AbstractMethodDec -> InterfaceMemberDec
+    ClassDec          -> InterfaceMemberDec
+    InterfaceDec      -> InterfaceMemberDec
+    ";"               -> InterfaceMemberDec {cons("Semicolon")}
+
+  context-free syntax
+    Public         -> InterfaceMod
+    Protected      -> InterfaceMod
+    Private        -> InterfaceMod
+    Abstract       -> InterfaceMod
+    Static         -> InterfaceMod
+    StrictFP       -> InterfaceMod
+
+
+
+
+module languages/java-15/classes/EnumDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/classes/ClassDeclarations
+
+exports
+  sorts
+    EnumDec
+    EnumDecHead
+    EnumBody
+    EnumConst
+    EnumConstArgs
+    EnumBodyDecs
+
+  context-free syntax
+    EnumDecHead EnumBody -> EnumDec {cons("EnumDec")}
+
+    (Anno | ClassMod)* "enum" Id Interfaces? -> EnumDecHead {cons("EnumDecHead")}
+
+    "{" {EnumConst ","}*     EnumBodyDecs? "}" -> EnumBody {cons("EnumBody")}
+    "{" {EnumConst ","}* "," EnumBodyDecs? "}" -> EnumBody {cons("EnumBody")}
+
+    Id EnumConstArgs? ClassBody?  -> EnumConst {cons("EnumConst")}
+    "(" {Expr ","}* ")"  -> EnumConstArgs {bracket}
+
+    ";" ClassBodyDec* -> EnumBodyDecs {cons("EnumBodyDecs")}
+
+module languages/java-15/classes/ConstructorDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Modifiers
+  languages/java-15/interfaces/Annotations
+  languages/java-15/statements/Main
+  languages/java-15/expressions/Main
+
+exports
+  sorts
+    ConstrDec
+    ConstrBody
+    ConstrHead
+    ConstrInv
+
+  context-free syntax
+    ConstrHead ConstrBody ->  ConstrDec {cons("ConstrDec")}
+    (Anno | ConstrMod)* TypeParams? Id "(" {FormalParam ","}* ")" Throws? -> ConstrHead {cons("ConstrDecHead")}
+
+
+    "{" ConstrInv? BlockStm* "}" -> ConstrBody {cons("ConstrBody")}
+
+             TypeArgs? "this"  "(" {Expr ","}* ")" ";" -> ConstrInv {cons("AltConstrInv")}
+             TypeArgs? "super" "(" {Expr ","}* ")" ";" -> ConstrInv {cons("SuperConstrInv")}
+    Expr "." TypeArgs? "super" "(" {Expr ","}* ")" ";" -> ConstrInv {cons("QSuperConstrInv")}
+
+  sorts ConstrMod
+  context-free syntax  
+    Public    -> ConstrMod
+    Protected -> ConstrMod
+    Private   -> ConstrMod
+
+
+
+
+module languages/java-15/classes/StaticInitializers
+imports
+  languages/java-15/statements/Blocks
+
+exports
+  sorts
+    StaticInit
+
+  context-free syntax
+    "static" Block -> StaticInit   {cons("StaticInit")}
+
+module languages/java-15/classes/InstanceInitializers
+imports
+  languages/java-15/statements/Blocks
+
+exports
+  sorts
+    InstanceInit
+
+  context-free syntax
+    Block -> InstanceInit {cons("InstanceInit")}
+
+module languages/java-15/statements/Statements
+imports
+  languages/java-15/statements/LocalVariableDeclarations
+  languages/java-15/statements/Blocks
+  languages/java-15/expressions/Main
+
+exports
+  sorts
+    Stm
+
+  context-free syntax
+    Block      -> Stm
+
+  %%%
+   %% Section 14.6: The Empty Statement
+   %%%
+  context-free syntax
+    ";"        -> Stm {cons("Empty")}
+
+  %%%
+   %% Section 14.7: Labeled Statements
+   %%%
+  context-free syntax
+    Id ":" Stm -> Stm {cons("Labeled")}
+
+  %%%
+   %% Section 14.8: Expressions Statements
+   %%%
+  context-free syntax
+    Expr ";"   -> Stm {cons("ExprStm")}
+
+  %%%
+   %% Section 14.9: The If Statement
+   %%%
+  context-free syntax
+    "if" "(" Expr ")" Stm             -> Stm {prefer, cons("If")}
+    "if" "(" Expr ")" Stm  "else" Stm -> Stm {cons("If")}
+
+  %%%
+   %% Section 14.10: The Assert Statement
+   %%%
+  context-free syntax
+    "assert" Expr          ";" -> Stm  {cons("AssertStm")}
+    "assert" Expr ":" Expr ";" -> Stm  {cons("AssertStm")}
+
+
+  %%%
+   %% Section 14.11: The Switch Statement
+   %%%
+  sorts SwitchBlock SwitchGroup SwitchLabel
+  context-free syntax
+    "switch" "(" Expr ")" SwitchBlock -> Stm {cons("Switch")}
+    "{" SwitchGroup* SwitchLabel* "}" -> SwitchBlock {cons("SwitchBlock")}
+    SwitchLabel+ BlockStm+ -> SwitchGroup  {cons("SwitchGroup")}
+
+    "case" Expr ":" -> SwitchLabel {cons("Case")}
+    "default"   ":" -> SwitchLabel {cons("Default")}
+
+  %%%
+   %% Section 14.12: The While Statement
+   %%%
+  context-free syntax
+    "while" "(" Expr ")" Stm -> Stm {cons("While")}
+
+  %%%
+   %% Section 14.13: The Do Statement
+   %%%
+  context-free syntax
+  "do" Stm "while" "(" Expr ")" ";" -> Stm {cons("DoWhile")}
+
+
+  %%%
+   %% Section 14.14: The For Statement
+   %%%
+  context-free syntax
+    "for" "(" LocalVarDec ";" Expr? ";" {Expr ","}* ")" Stm -> Stm {cons("For")}
+    "for" "(" {Expr ","}* ";" Expr? ";" {Expr ","}* ")" Stm -> Stm {cons("For")}
+
+    "for" "(" FormalParam ":" Expr ")" Stm -> Stm {cons("ForEach")}
+
+  %%%
+   %% Section 14.15: The Break Statement
+   %%%
+  context-free syntax
+    "break"    Id? ";"   -> Stm {cons("Break")}
+
+  %%%
+   %% Section 14.16: The Continue Statement
+   %%%
+  context-free syntax
+    "continue" Id? ";"   -> Stm {cons("Continue")}
+
+  %%%
+   %% Section 14.17: The Return Statement
+   %%%
+  context-free syntax
+    "return"   Expr? ";" -> Stm {cons("Return")}
+
+  %%%
+   %% Section 14.18: The Throw Statement
+   %%%
+  context-free syntax
+    "throw"    Expr  ";" -> Stm {cons("Throw")}
+
+  %%%
+   %% Section 14.19: The Synchronized Statement
+   %%%
+  context-free syntax
+    "synchronized" "(" Expr ")" Block -> Stm {cons("Synchronized")}
+
+  %%%
+   %% Section 14.20: The Try Statement
+   %%%
+  sorts CatchClause
+  context-free syntax
+    "try" Block CatchClause+ -> Stm {cons("Try")}
+    "try" Block CatchClause* "finally" Block -> Stm {cons("Try")}
+    "catch" "(" FormalParam ")" Block -> CatchClause {cons("Catch")}
+
+module languages/java-15/statements/LocalVariableDeclarations
+imports
+  languages/java-15/classes/MethodDeclarations
+  languages/java-15/classes/FieldDeclarations
+
+exports
+  sorts
+    LocalVarDecStm
+    LocalVarDec
+
+  context-free syntax
+    LocalVarDec ";" -> LocalVarDecStm {prefer, cons("LocalVarDecStm")}
+    (Anno | VarMod)* Type {VarDec ","}+ -> LocalVarDec {prefer, cons("LocalVarDec")}
+
+module languages/java-15/statements/Blocks
+imports
+  languages/java-15/classes/ClassDeclarations
+  languages/java-15/statements/LocalVariableDeclarations
+  languages/java-15/statements/Statements
+
+exports
+  sorts
+    BlockStm
+    Block
+
+  context-free syntax
+    "{" BlockStm* "}" -> Block {cons("Block")}
+
+    LocalVarDecStm  -> BlockStm 
+    ClassDec        -> BlockStm {cons("ClassDecStm")}
+    Stm             -> BlockStm
+
+
+
+
+module languages/java-15/classes/MethodDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Modifiers
+  languages/java-15/types/Main
+  languages/java-15/classes/FieldDeclarations
+  languages/java-15/interfaces/Annotations
+  languages/java-15/statements/Blocks
+
+exports
+  sorts
+    MethodDec
+    MethodDecHead
+    ResultType
+
+  context-free syntax
+    MethodDecHead MethodBody -> MethodDec {cons("MethodDec")}
+
+    (Anno | MethodMod)* TypeParams? ResultType Id "(" {FormalParam ","}* ")" Throws?      -> MethodDecHead {cons("MethodDecHead")}
+    (Anno | MethodMod)* TypeParams? ResultType Id "(" {FormalParam ","}* ")" Dim+ Throws? -> MethodDecHead {cons("DeprMethodDecHead")}
+
+    Type   -> ResultType
+    "void" -> ResultType {cons("Void")}
+
+  sorts FormalParam
+  context-free syntax
+    (Anno | VarMod)* Type       VarDecId -> FormalParam {cons("Param")}
+    (Anno | VarMod)* Type "..." VarDecId -> FormalParam {cons("VarArityParam")}
+
+  sorts VarMod
+  context-free syntax
+    Final -> VarMod
+
+  sorts MethodMod
+  context-free syntax
+    Public         -> MethodMod
+    Protected      -> MethodMod
+    Private        -> MethodMod
+
+    Abstract       -> MethodMod
+    Static         -> MethodMod
+    Final          -> MethodMod
+    Synchronized   -> MethodMod
+    Native         -> MethodMod
+    StrictFP       -> MethodMod
+
+  %%%
+   %% Section 8.4.6: Method Throws
+   %%%
+  sorts
+    Throws
+    ExceptionType
+
+  context-free syntax
+    "throws" {ExceptionType ","}+ -> Throws {cons("ThrowsDec")}
+    ClassType -> ExceptionType
+    %% TypeVar -> ExceptionType
+
+  %%%
+   %% Section 8.4.7: Method Body
+   %%% 
+  sorts MethodBody
+  context-free syntax
+    Block -> MethodBody
+    ";"   -> MethodBody {cons("NoMethodBody")}
+
+module languages/java-15/arrays/ArrayInitializers
+imports
+  languages/java-15/classes/FieldDeclarations
+
+exports
+  sorts ArrayInit
+  context-free syntax
+    "{" {VarInit ","}*     "}" -> ArrayInit {cons("ArrayInit")}
+    "{" {VarInit ","}* "," "}" -> ArrayInit {cons("ArrayInit")}
+
+module languages/java-15/interfaces/Annotations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/names/Main
+  languages/java-15/expressions/Main
+
+exports
+  sorts
+    Anno
+    ElemVal
+    ElemValPair
+
+  context-free syntax
+    "@" TypeName "(" {ElemValPair ","}* ")" -> Anno {cons("Anno")}
+    "@" TypeName "(" ElemVal ")"            -> Anno {cons("SingleElemAnno")}
+    "@" TypeName                            -> Anno {cons("MarkerAnno")}
+
+  context-free syntax  
+    Id "=" ElemVal -> ElemValPair {cons("ElemValPair")}
+
+    Expr -> ElemVal
+    Anno -> ElemVal
+
+    "{" {ElemVal ","}*     "}" -> ElemVal {cons("ElemValArrayInit")}
+    "{" {ElemVal ","}* "," "}" -> ElemVal {cons("ElemValArrayInit")}
+
+    %% Assignments are not allowed as element values.
+    LHS "=" Expr -> ElemVal {reject}
+
+module languages/java-15/classes/FieldDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Modifiers
+  languages/java-15/types/Main
+  languages/java-15/interfaces/Annotations
+  languages/java-15/arrays/ArrayInitializers
+  languages/java-15/expressions/Main
+
+exports
+  sorts
+    FieldDec
+    VarDec
+    VarDecId
+    Dim
+    VarInit
+
+  context-free syntax
+    (Anno | FieldMod)* Type { VarDec ","}+ ";" -> FieldDec {cons("FieldDec")}
+
+    VarDecId             -> VarDec {cons("VarDec")}
+    VarDecId "=" VarInit -> VarDec {cons("VarDec")}
+
+    Id      -> VarDecId
+    Id Dim+ -> VarDecId {cons("ArrayVarDecId")}
+
+    "[" "]" -> Dim {cons("Dim")}
+
+    Expr      -> VarInit
+    ArrayInit -> VarInit
+
+  sorts FieldMod
+  context-free syntax
+    Public    -> FieldMod
+    Protected -> FieldMod
+    Private   -> FieldMod
+
+    Static    -> FieldMod
+    Final     -> FieldMod
+    Transient -> FieldMod
+    Volatile  -> FieldMod
+
+
+
+
+module languages/java-15/classes/ClassDeclarations
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Modifiers
+  languages/java-15/types/ReferenceTypes
+  languages/java-15/types/TypeVariables
+  languages/java-15/classes/FieldDeclarations
+  languages/java-15/classes/MethodDeclarations
+  languages/java-15/classes/InstanceInitializers
+  languages/java-15/classes/StaticInitializers
+  languages/java-15/classes/ConstructorDeclarations
+  languages/java-15/classes/EnumDeclarations
+  languages/java-15/interfaces/InterfaceDeclarations
+
+exports
+  sorts
+    ClassDec
+    ClassBody
+    ClassDecHead
+
+  context-free syntax
+    EnumDec -> ClassDec
+
+    ClassDecHead ClassBody -> ClassDec {cons("ClassDec")}
+    "{" ClassBodyDec* "}" -> ClassBody {cons("ClassBody")}
+
+    (Anno | ClassMod)* "class" Id  TypeParams? Super? Interfaces? -> ClassDecHead {cons("ClassDecHead")}
+
+  %% 8.1.1: Class Modifiers
+  sorts ClassMod
+  context-free syntax
+    Abstract  -> ClassMod
+    Public    -> ClassMod
+    Protected -> ClassMod
+    Private   -> ClassMod
+    Static    -> ClassMod
+    Final     -> ClassMod
+    StrictFP  -> ClassMod
+
+  %% 8.1.4: Superclasses and Subclasses
+  sorts Super
+  context-free syntax
+
+    "extends" ClassType -> Super {cons("SuperDec")}
+
+  %% 8.1.5: Superinterfaces
+  sorts Interfaces
+  context-free syntax
+    "implements" {InterfaceType ","}+ -> Interfaces {cons("ImplementsDec")}
+
+
+  %% 8.1.6: Class Body and Member Declarations
+  sorts
+    ClassBodyDec
+    ClassMemberDec
+
+  context-free syntax
+    ClassMemberDec -> ClassBodyDec
+    InstanceInit   -> ClassBodyDec
+    StaticInit     -> ClassBodyDec
+    ConstrDec      -> ClassBodyDec
+
+  context-free syntax
+    FieldDec     -> ClassMemberDec
+    MethodDec    -> ClassMemberDec
+    ClassDec     -> ClassMemberDec
+    InterfaceDec -> ClassMemberDec
+    ";"          -> ClassMemberDec {cons("Semicolon")}
+
+module languages/java-15/packages/TypeDeclarations
+imports
+  languages/java-15/classes/ClassDeclarations
+  languages/java-15/interfaces/InterfaceDeclarations
+
+exports
+  sorts
+    TypeDec
+
+  context-free syntax
+    ClassDec      -> TypeDec
+    InterfaceDec  -> TypeDec
+    ";"           -> TypeDec {cons("Semicolon")}
+
+module languages/java-15/packages/CompilationUnits
+imports
+  languages/java-15/packages/PackageDeclarations
+  languages/java-15/packages/ImportDeclarations
+  languages/java-15/packages/TypeDeclarations
+
+exports
+  sorts
+    CompilationUnit
+
+  context-free syntax
+    PackageDec? ImportDec* TypeDec+ -> CompilationUnit   {cons("CompilationUnit")}
+
+module languages/java-15/packages/Main
+imports
+  languages/java-15/packages/CompilationUnits
+  languages/java-15/packages/ImportDeclarations
+  languages/java-15/packages/PackageDeclarations
+
+
+
+
+module languages/java-15/names/Main
+imports
+  languages/java-15/lexical/Identifiers
+exports
+  sorts PackageName
+  context-free syntax
+    {Id "."}+ -> PackageName {cons("PackageName")}
+
+  sorts
+    TypeName
+    ExprName
+    MethodName
+    PackageOrTypeName
+    AmbName
+
+  context-free syntax
+    Id             -> AmbName {cons("AmbName")}
+    AmbName "." Id -> AmbName {cons("AmbName")}
+
+    Id                       -> TypeName {cons("TypeName")}
+    PackageOrTypeName "." Id -> TypeName {cons("TypeName")}
+
+    Id             -> ExprName {cons("ExprName")}
+    AmbName "." Id -> ExprName {cons("ExprName")}
+
+    Id             -> MethodName  {cons("MethodName")}
+    AmbName "." Id -> MethodName  {cons("MethodName")}
+
+    Id                       -> PackageOrTypeName {cons("PackageOrTypeName")}
+    PackageOrTypeName "." Id -> PackageOrTypeName {cons("PackageOrTypeName")}
+
+module languages/java-15/types/ParameterizedTypes
+imports
+  languages/java-15/types/ReferenceTypes
+
+exports
+  sorts
+    TypeArgs
+    ActualTypeArg
+    WildcardBound
+    
+  context-free syntax
+    "<" {ActualTypeArg ","}+ ">" -> TypeArgs {cons("TypeArgs")}
+
+    Type               -> ActualTypeArg
+    "?" WildcardBound? -> ActualTypeArg {cons("Wildcard")}
+
+    "extends" RefType -> WildcardBound {cons("WildcardUpperBound")}
+    "super"   RefType -> WildcardBound {cons("WildcardLowerBound")}
+
+module languages/java-15/types/TypeVariables
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/types/ReferenceTypes
+
+exports
+  sorts
+    TypeParams
+    TypeParam
+    TypeBound
+    TypeVarId
+  
+  context-free syntax
+    TypeVarId TypeBound? -> TypeParam {cons("TypeParam")}
+    
+    "extends" {ClassOrInterfaceType "&"}+ -> TypeBound {cons("TypeBound")}
+    "<" {TypeParam ","}+ ">" -> TypeParams {cons("TypeParams")}
+
+    Id -> TypeVarId
+    
+
+
+
+module languages/java-15/types/ReferenceTypes
+imports
+  languages/java-15/lexical/Identifiers
+  languages/java-15/names/Main
+  languages/java-15/types/Main  
+  languages/java-15/types/ParameterizedTypes
+  languages/java-15/types/TypeVariables
+
+
+exports
+  sorts
+    RefType
+    ClassOrInterfaceType
+    ClassType
+    InterfaceType
+    TypeDecSpec
+    ArrayType
+    TypeVar
+
+  context-free syntax
+    ClassOrInterfaceType -> RefType
+    ArrayType            -> RefType
+    
+    %% This production rule is highly ambiguous, since every
+    %% TypeVar can be a ClassOrInterfaceType. A later disambiguation
+    %% phase has to find out if a ClassOrInterfaceType is in fact
+    %% a TypeVar.
+    
+    %% TypeVar -> RefType {avoid}
+
+  context-free syntax
+  
+    %% ClassType and InterfaceType are ambiguous. We modify the
+    %% production of ClassOrInterfaceType to make this ambiguity explicit.
+    
+    TypeDecSpec TypeArgs? -> ClassOrInterfaceType {cons("ClassOrInterfaceType")}
+    TypeDecSpec TypeArgs? -> ClassType {cons("ClassType")}
+    TypeDecSpec TypeArgs? -> InterfaceType {cons("InterfaceType")}
+
+    TypeName -> TypeDecSpec
+    TypeDecSpec TypeArgs "." Id -> TypeDecSpec {cons("Member")}
+    
+  context-free syntax    
+    TypeVarId -> TypeVar {cons("TypeVar")}
+
+  context-free syntax
+    Type "[" "]" -> ArrayType  {cons("ArrayType")}
+
+module languages/java-15/types/PrimitiveTypes
+exports
+  sorts
+    PrimType
+    NumType
+    IntType  
+    FloatType
+
+  context-free syntax
+    NumType   -> PrimType
+    "boolean" -> PrimType {cons("Boolean")}
+
+    IntType   -> NumType
+    FloatType -> NumType
+
+    "byte"   -> IntType   {cons("Byte")}
+    "short"  -> IntType   {cons("Short")}
+    "int"    -> IntType   {cons("Int")}
+    "long"   -> IntType   {cons("Long")}
+    "char"   -> IntType   {cons("Char")}
+    "float"  -> FloatType {cons("Float")}
+    "double" -> FloatType {cons("Double")}
+
+module languages/java-15/types/Main
+imports
+  languages/java-15/types/PrimitiveTypes
+  languages/java-15/types/ReferenceTypes
+  languages/java-15/types/TypeVariables
+  languages/java-15/types/ParameterizedTypes
+
+exports
+  sorts
+    Type
+
+  context-free syntax
+    PrimType -> Type
+    RefType  -> Type
+
+
+
+
+module languages/java-15/lexical/literals/NullLiteral
+exports
+  sorts NullLiteral
+  context-free syntax
+    "null"  -> NullLiteral {cons("Null")}
+
+module languages/java-15/lexical/literals/StringLiterals
+imports
+  languages/java-15/lexical/literals/EscapeSequences
+  languages/java-15/lexical/UnicodeEscapes
+
+exports
+  sorts
+    StringLiteral
+    StringPart
+    StringChars
+    FooStringChars
+
+  syntax
+    StringLiteral -> <StringLiteral-CF>
+    
+    "\"" StringPart* "\"" -> StringLiteral {cons("String")}
+    StringChars    -> StringPart {cons("Chars")}
+    UnicodeEscape  -> StringPart
+    EscapeSeq      -> StringPart
+
+    <FooStringChars-LEX> -> StringChars
+    ~[\"\\\n\13]+  -> <FooStringChars-LEX>
+
+  restrictions
+    StringChars -/- ~[\"\\\n\13]
+
+module languages/java-15/lexical/literals/EscapeSequences
+imports
+
+exports
+  sorts
+    EscapeSeq
+    NamedEscape
+    OctaEscape
+    LastOcta
+
+  syntax
+    OctaEscape  -> EscapeSeq
+    NamedEscape -> EscapeSeq
+
+    "\\" [btnfr\"\'\\]     -> NamedEscape {cons("NamedEscape")}
+    "\\" LastOcta          -> OctaEscape  {cons("OctaEscape1")}
+    "\\" [0-3] LastOcta    -> OctaEscape  {cons("OctaEscape2")}
+    "\\" [4-7] [0-7]       -> OctaEscape  {cons("OctaEscape2")}
+    "\\" [0-3] [0-7] [0-7] -> OctaEscape  {cons("OctaEscape3")}
+
+    [0-7] -> LastOcta
+
+  restrictions
+    LastOcta -/- [0-7]
+
+module languages/java-15/lexical/literals/CharacterLiterals
+imports
+  languages/java-15/lexical/literals/EscapeSequences
+  languages/java-15/lexical/UnicodeEscapes
+
+exports
+  sorts
+    CharLiteral
+    CharContent
+    SingleChar
+
+  syntax
+    CharLiteral   -> <CharLiteral-CF>
+
+    "'" CharContent "'" -> CharLiteral {cons("Char")}
+    SingleChar    -> CharContent {cons("Single")}
+    UnicodeEscape -> CharContent
+    EscapeSeq     -> CharContent
+
+    ~[\r\n\'\\] -> SingleChar
+
+
+
+
+module languages/java-15/lexical/literals/BooleanLiterals
+exports
+  sorts
+    Bool
+    BoolLiteral
+
+  context-free syntax
+    Bool -> BoolLiteral {cons("Bool")}
+    "true"  -> Bool {cons("True")}
+    "false" -> Bool {cons("False")}
+
+module languages/java-15/lexical/literals/FloatingPointLiterals
+exports
+  sorts
+    FloatLiteral
+    DeciFloatLiteral
+    HexaFloatLiteral      
+  
+  context-free syntax
+    DeciFloatLiteral -> FloatLiteral {cons("Float")}
+    HexaFloatLiteral -> FloatLiteral {cons("Float")}
+
+  lexical syntax
+    DeciFloatNumeral [fFdD]? -> DeciFloatLiteral
+    HexaFloatNumeral [fFdD]? -> HexaFloatLiteral
+    
+    %% Reject plain integer literals as decimal float literals.
+    %% A similar rejection for hexadecimal float literals is not
+    %% required, since these always contain an exponent part.
+    [0-9]+ -> DeciFloatLiteral {reject}
+
+  lexical restrictions
+    DeciFloatLiteral -/- [fFdD]
+    HexaFloatLiteral -/- [fFdD]
+
+  %%%
+   %% Decimal Floating Point Numerals
+   %%%
+  sorts
+    DeciFloatNumeral
+    DeciFloatDigits
+    DeciFloatExponentPart
+
+  lexical syntax
+    DeciFloatDigits DeciFloatExponentPart? -> DeciFloatNumeral
+
+    [0-9]* "." [0-9]* -> DeciFloatDigits
+           "."        -> DeciFloatDigits {reject}
+    [0-9]+            -> DeciFloatDigits
+
+    [eE] SignedInteger -> DeciFloatExponentPart
+    
+    [\+\-]? [0-9]+ -> SignedInteger    
+
+  lexical restrictions
+    DeciFloatDigits  -/- [0-9]
+    DeciFloatExponentPart -/- [0-9]
+
+  %%%
+   %% Hexadecimal Floating Point Literals
+   %%%
+  sorts
+    HexaFloatNumeral
+    HexaSignificand
+    BinaryExponent
+    SignedInteger
+    
+  lexical syntax
+    HexaSignificand BinaryExponent -> HexaFloatNumeral
+
+    [0][xX] [0-9a-fA-F]+                  -> HexaSignificand
+    [0][xX] [0-9a-fA-F]* "." [0-9a-fA-F]* -> HexaSignificand
+    [0][xX]              "."              -> HexaSignificand {reject}
+
+    [pP] SignedInteger -> BinaryExponent
+  lexical restrictions
+    HexaSignificand -/- [0-9a-fA-F]
+    SignedInteger   -/- [0-9]
+
+module languages/java-15/lexical/literals/IntegerLiterals
+exports
+  sorts
+    IntLiteral
+    DeciLiteral
+    HexaLiteral
+    OctaLiteral
+    DeciNumeral
+    HexaNumeral
+    OctaNumeral
+
+  context-free syntax
+    DeciLiteral -> IntLiteral {cons("Deci")}
+    HexaLiteral -> IntLiteral {cons("Hexa")}
+    OctaLiteral -> IntLiteral {cons("Octa")}
+
+  lexical syntax
+    DeciNumeral [lL]? -> DeciLiteral
+    HexaNumeral [lL]? -> HexaLiteral
+    OctaNumeral [lL]? -> OctaLiteral
+
+    "0" -> DeciNumeral
+    [1-9][0-9]*  -> DeciNumeral
+    [0][xX] [0-9a-fA-F]+ -> HexaNumeral
+    [0]     [0-7]+       -> OctaNumeral
+
+  lexical restrictions
+    DeciNumeral -/- [0-9\.fFdD]
+    HexaNumeral -/- [0-9a-fA-F]
+    OctaNumeral -/- [0-7]
+
+    DeciLiteral -/- [lL]
+    HexaLiteral -/- [lL]
+    OctaLiteral -/- [lL]
+
+module languages/java-15/lexical/literals/Main
+imports
+  languages/java-15/lexical/literals/IntegerLiterals
+  languages/java-15/lexical/literals/FloatingPointLiterals
+  languages/java-15/lexical/literals/BooleanLiterals  
+  languages/java-15/lexical/literals/CharacterLiterals  
+  languages/java-15/lexical/literals/StringLiterals
+  languages/java-15/lexical/literals/NullLiteral
+
+
+
+
+module languages/java-15/lexical/Modifiers
+exports
+  sorts
+    Public
+    Private
+    Protected
+    Abstract
+    Final
+    Static
+    Native
+    Transient
+    Volatile
+    Synchronized
+    StrictFP
+    Modifier
+
+  context-free syntax
+    "public"       -> Public       {cons("Public")}
+    "private"      -> Private      {cons("Private")}
+    "protected"    -> Protected    {cons("Protected")}
+
+    "abstract"     -> Abstract     {cons("Abstract")}
+    "final"        -> Final        {cons("Final")}
+    "static"       -> Static       {cons("Static")}
+    "native"       -> Native       {cons("Native")}
+    "transient"    -> Transient    {cons("Transient")}
+    "volatile"     -> Volatile     {cons("Volatile")}
+    "synchronized" -> Synchronized {cons("Synchronized")}
+    "strictfp"     -> StrictFP     {cons("StrictFP")}
+
+    Public       -> Modifier
+    Private      -> Modifier
+    Protected    -> Modifier
+    Abstract     -> Modifier
+    Final        -> Modifier
+    Static       -> Modifier
+    Native       -> Modifier
+    Transient    -> Modifier
+    Volatile     -> Modifier
+    Synchronized -> Modifier
+    StrictFP     -> Modifier
+
+
+
+
+module languages/java-15/lexical/Keywords
+exports
+  sorts Keyword
+  lexical syntax
+    "abstract"      -> Keyword
+    "assert"        -> Keyword
+    "boolean"       -> Keyword
+    "break"         -> Keyword
+    "byte"          -> Keyword
+    "case"          -> Keyword
+    "catch"         -> Keyword
+    "char"          -> Keyword
+    "class"         -> Keyword
+    "const"         -> Keyword
+    "continue"      -> Keyword
+    "default"       -> Keyword
+    "do"            -> Keyword
+    "double"        -> Keyword
+    "else"          -> Keyword
+    "enum"          -> Keyword
+    "extends"       -> Keyword
+    "final"         -> Keyword
+    "finally"       -> Keyword
+    "float"         -> Keyword
+    "for"           -> Keyword
+    "goto"          -> Keyword
+    "if"            -> Keyword
+    "implements"    -> Keyword
+    "import"        -> Keyword
+    "instanceof"    -> Keyword
+    "int"           -> Keyword
+    "interface"     -> Keyword
+    "long"          -> Keyword
+    "native"        -> Keyword
+    "new"           -> Keyword
+    "package"       -> Keyword
+    "private"       -> Keyword
+    "protected"     -> Keyword
+    "public"        -> Keyword
+    "return"        -> Keyword
+    "short"         -> Keyword
+    "static"        -> Keyword
+    "strictfp"      -> Keyword
+    "super"         -> Keyword
+    "switch"        -> Keyword
+    "synchronized"  -> Keyword
+    "this"          -> Keyword
+    "throw"         -> Keyword
+    "throws"        -> Keyword
+    "transient"     -> Keyword
+    "try"           -> Keyword
+    "void"          -> Keyword
+    "volatile"      -> Keyword
+    "while"         -> Keyword
+
+  lexical restrictions
+
+    "abstract"
+    "assert"
+    "boolean" 
+    "break"   
+    "byte"    
+    "case"    
+    "catch"   
+    "char"     
+    "class"
+    "const"    
+    "continue" 
+    "default"  
+    "do"       
+    "double"   
+    "else"     
+    "enum"
+    "extends"  
+    "final"     
+    "finally"   
+    "float"     
+    "for"       
+    "goto"       
+    "if"         
+    "implements" 
+    "import"     
+    "instanceof" 
+    "int"        
+    "interface"  
+    "long"       
+    "native"     
+    "new"        
+    "package"    
+    "private"    
+    "protected"   
+    "public"       
+    "return"       
+    "short"        
+    "static"     
+    "strictfp"
+    "super"        
+    "switch"       
+    "synchronized" 
+    "this"         
+    "throw"        
+    "throws"       
+    "transient"    
+    "try"          
+    "void"         
+    "volatile"     
+    "while"       -/- [A-Za-z0-9\_\$]
+
+module languages/java-15/lexical/Identifiers
+imports
+  languages/java-15/lexical/Keywords
+exports
+  sorts
+    Id
+    ID
+
+  context-free syntax
+    ID -> Id {cons("Id")}
+
+  lexical syntax
+    [A-Za-z\_\$][A-Za-z0-9\_\$]* -> ID
+    
+    Keyword -> ID {reject}
+    "true"  -> ID {reject}
+    "false" -> ID {reject}
+    "null"  -> ID {reject}
+
+  lexical restrictions
+    ID -/- [a-zA-Z0-9\_\$]
+
+module languages/java-15/lexical/Comments
+imports
+  languages/java-15/lexical/LineTerminators
+exports
+  sorts
+    Comment
+    EOLCommentChars
+    CommentPart
+    UnicodeEscape
+    BlockCommentChars
+    Asterisk
+    EscEscChar
+    EscChar
+
+  lexical syntax
+    Comment -> LAYOUT
+
+    "//" EOLCommentChars LineTerminator -> Comment
+    ~[\n\r]* -> EOLCommentChars
+
+    "/*"  CommentPart* "*/" -> Comment
+    "/**" CommentPart* "*/" -> Comment
+    "/**/"                  -> Comment %% Strange javadoc comment
+
+    BlockCommentChars -> CommentPart
+    EscChar           -> CommentPart
+    EscEscChar        -> CommentPart
+    Asterisk          -> CommentPart
+    UnicodeEscape     -> CommentPart
+
+    ~[\*\\]+ -> BlockCommentChars
+
+    "*"    -> Asterisk
+    "\\\\" -> EscEscChar
+    "\\"   -> EscChar
+
+    "\\" [u]+ [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] -> UnicodeEscape
+
+  lexical restrictions
+    "/**"    -/- [\/]
+    "/*"     -/- [\*]
+    Asterisk -/- [\/]
+    EscChar  -/- [\\u]
+
+    BlockCommentChars -/- ~[\*\\]
+    EOLCommentChars   -/- ~[\n\13]
+
+  context-free restrictions
+    LAYOUT?  -/- [\/].[\*]
+    LAYOUT?  -/- [\/].[\/]
+
+module languages/java-15/lexical/WhiteSpace
+exports
+  lexical syntax
+    [\ \t\12\r\n] -> LAYOUT
+
+  context-free restrictions
+    LAYOUT? -/- [\ \t\12\n\r]
+
+module languages/java-15/lexical/LineTerminators
+exports
+  sorts
+    LineTerminator CarriageReturn EndOfFile
+
+  lexical syntax
+    [\n]           -> LineTerminator
+    [\r][\n]       -> LineTerminator
+    CarriageReturn -> LineTerminator
+    EndOfFile      -> LineTerminator
+
+    [\r] -> CarriageReturn
+
+  lexical restrictions
+    CarriageReturn -/- [\n]
+
+  %% End of file is empty.
+  lexical syntax    
+    -> EndOfFile
+
+  lexical restrictions
+    EndOfFile -/- ~[]
+
+module languages/java-15/lexical/UnicodeEscapes
+exports
+  sorts
+    UnicodeEscape
+
+  syntax
+    "\\" [u]+ [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] -> UnicodeEscape {cons("UnicodeEscape")}
+
+module languages/java-15/lexical/Main
+imports
+  languages/java-15/lexical/UnicodeEscapes
+  languages/java-15/lexical/LineTerminators
+  languages/java-15/lexical/WhiteSpace
+  languages/java-15/lexical/Comments
+  languages/java-15/lexical/Identifiers
+  languages/java-15/lexical/Keywords
+  languages/java-15/lexical/Modifiers
+  languages/java-15/lexical/literals/Main
+
+
+
+module languages/java-15/Main
+imports
+  languages/java-15/lexical/Main
+  languages/java-15/types/Main
+  languages/java-15/names/Main
+  languages/java-15/packages/Main
+  languages/java-15/classes/Main
+  languages/java-15/interfaces/Main
+  languages/java-15/arrays/Main
+  languages/java-15/statements/Main
+  languages/java-15/expressions/Main
+
+
+
+
+module languages/java-15/JavaMix[Ctx0]
+imports languages/java-15/Main
+          [ CompilationUnit       => CompilationUnit[[Ctx0]]
+            TypeDec               => TypeDec[[Ctx0]]
+            ImportDec             => ImportDec[[Ctx0]]
+            PackageDec            => PackageDec[[Ctx0]]
+            ElemVal               => ElemVal[[Ctx0]]
+            ElemValPair           => ElemValPair[[Ctx0]]
+            Anno                  => Anno[[Ctx0]]
+            LHS                   => LHS[[Ctx0]]
+            CondMid               => CondMid[[Ctx0]]
+            ArraySubscript        => ArraySubscript[[Ctx0]]
+            DimExpr               => DimExpr[[Ctx0]]
+            ArrayBaseType         => ArrayBaseType[[Ctx0]]
+            ArrayCreationExpr     => ArrayCreationExpr[[Ctx0]]
+            ClassMemberDec        => ClassMemberDec[[Ctx0]]
+            ClassBodyDec          => ClassBodyDec[[Ctx0]]
+            Interfaces            => Interfaces[[Ctx0]]
+            Super                 => Super[[Ctx0]]
+            ClassMod              => ClassMod[[Ctx0]]
+            ClassDecHead          => ClassDecHead[[Ctx0]]
+            ClassBody             => ClassBody[[Ctx0]]
+            ClassDec              => ClassDec[[Ctx0]]
+            InterfaceMod          => InterfaceMod[[Ctx0]]
+            InterfaceMemberDec    => InterfaceMemberDec[[Ctx0]]
+            ExtendsInterfaces     => ExtendsInterfaces[[Ctx0]]
+            InterfaceDecHead      => InterfaceDecHead[[Ctx0]]
+            InterfaceDec          => InterfaceDec[[Ctx0]]
+            DefaultVal            => DefaultVal[[Ctx0]]
+            AnnoElemDec           => AnnoElemDec[[Ctx0]]
+            AnnoDecHead           => AnnoDecHead[[Ctx0]]
+            AnnoDec               => AnnoDec[[Ctx0]]
+            AbstractMethodMod     => AbstractMethodMod[[Ctx0]]
+            AbstractMethodDec     => AbstractMethodDec[[Ctx0]]
+            ConstantMod           => ConstantMod[[Ctx0]]
+            ConstantDec           => ConstantDec[[Ctx0]]
+            EnumBodyDecs          => EnumBodyDecs[[Ctx0]]
+            EnumConstArgs         => EnumConstArgs[[Ctx0]]
+            EnumConst             => EnumConst[[Ctx0]]
+            EnumBody              => EnumBody[[Ctx0]]
+            EnumDecHead           => EnumDecHead[[Ctx0]]
+            EnumDec               => EnumDec[[Ctx0]]
+            ConstrMod             => ConstrMod[[Ctx0]]
+            ConstrInv             => ConstrInv[[Ctx0]]
+            ConstrBody            => ConstrBody[[Ctx0]]
+            ConstrHead            => ConstrHead[[Ctx0]]
+            ConstrDec             => ConstrDec[[Ctx0]]
+            StaticInit            => StaticInit[[Ctx0]]
+            InstanceInit          => InstanceInit[[Ctx0]]
+            MethodBody            => MethodBody[[Ctx0]]
+            ExceptionType         => ExceptionType[[Ctx0]]
+            Throws                => Throws[[Ctx0]]
+            MethodMod             => MethodMod[[Ctx0]]
+            VarMod                => VarMod[[Ctx0]]
+            FormalParam           => FormalParam[[Ctx0]]
+            ResultType            => ResultType[[Ctx0]]
+            MethodDecHead         => MethodDecHead[[Ctx0]]
+            MethodDec             => MethodDec[[Ctx0]]
+            BlockStm              => BlockStm[[Ctx0]]
+            Block                 => Block[[Ctx0]]
+            CatchClause           => CatchClause[[Ctx0]]
+            SwitchLabel           => SwitchLabel[[Ctx0]]
+            SwitchGroup           => SwitchGroup[[Ctx0]]
+            SwitchBlock           => SwitchBlock[[Ctx0]]
+            Stm                   => Stm[[Ctx0]]
+            LocalVarDec           => LocalVarDec[[Ctx0]]
+            LocalVarDecStm        => LocalVarDecStm[[Ctx0]]
+            FieldMod              => FieldMod[[Ctx0]]
+            VarInit               => VarInit[[Ctx0]]
+            Dim                   => Dim[[Ctx0]]
+            VarDecId              => VarDecId[[Ctx0]]
+            VarDec                => VarDec[[Ctx0]]
+            FieldDec              => FieldDec[[Ctx0]]
+            ArrayInit             => ArrayInit[[Ctx0]]
+            ClassLiteral          => ClassLiteral[[Ctx0]]
+            Literal               => Literal[[Ctx0]]
+            Type                  => Type[[Ctx0]]
+            ArrayType             => ArrayType[[Ctx0]]
+            TypeVar               => TypeVar[[Ctx0]]
+            TypeDecSpec           => TypeDecSpec[[Ctx0]]
+            InterfaceType         => InterfaceType[[Ctx0]]
+            ClassType             => ClassType[[Ctx0]]
+            ClassOrInterfaceType  => ClassOrInterfaceType[[Ctx0]]
+            RefType               => RefType[[Ctx0]]
+            TypeVarId             => TypeVarId[[Ctx0]]
+            TypeParams            => TypeParams[[Ctx0]]
+            TypeBound             => TypeBound[[Ctx0]]
+            TypeParam             => TypeParam[[Ctx0]]
+            WildcardBound         => WildcardBound[[Ctx0]]
+            ActualTypeArg         => ActualTypeArg[[Ctx0]]
+            TypeArgs              => TypeArgs[[Ctx0]]
+            PackageOrTypeName     => PackageOrTypeName[[Ctx0]]
+            MethodName            => MethodName[[Ctx0]]
+            ExprName              => ExprName[[Ctx0]]
+            TypeName              => TypeName[[Ctx0]]
+            AmbName               => AmbName[[Ctx0]]
+            PackageName           => PackageName[[Ctx0]]
+            FloatType             => FloatType[[Ctx0]]
+            IntType               => IntType[[Ctx0]]
+            NumType               => NumType[[Ctx0]]
+            PrimType              => PrimType[[Ctx0]]
+            NullLiteral           => NullLiteral[[Ctx0]]
+            FooStringChars        => FooStringChars[[Ctx0]]
+            StringChars           => StringChars[[Ctx0]]
+            StringPart            => StringPart[[Ctx0]]
+            StringLiteral         => StringLiteral[[Ctx0]]
+            SingleChar            => SingleChar[[Ctx0]]
+            CharContent           => CharContent[[Ctx0]]
+            CharLiteral           => CharLiteral[[Ctx0]]
+            LastOcta              => LastOcta[[Ctx0]]
+            OctaEscape            => OctaEscape[[Ctx0]]
+            NamedEscape           => NamedEscape[[Ctx0]]
+            EscapeSeq             => EscapeSeq[[Ctx0]]
+            Bool                  => Bool[[Ctx0]]
+            BoolLiteral           => BoolLiteral[[Ctx0]]
+            BinaryExponent        => BinaryExponent[[Ctx0]]
+            HexaSignificand       => HexaSignificand[[Ctx0]]
+            HexaFloatNumeral      => HexaFloatNumeral[[Ctx0]]
+            SignedInteger         => SignedInteger[[Ctx0]]
+            DeciFloatExponentPart => DeciFloatExponentPart[[Ctx0]]
+            DeciFloatDigits       => DeciFloatDigits[[Ctx0]]
+            DeciFloatNumeral      => DeciFloatNumeral[[Ctx0]]
+            FloatLiteral          => FloatLiteral[[Ctx0]]
+            HexaFloatLiteral      => HexaFloatLiteral[[Ctx0]]
+            DeciFloatLiteral      => DeciFloatLiteral[[Ctx0]]
+            IntLiteral            => IntLiteral[[Ctx0]]
+            OctaNumeral           => OctaNumeral[[Ctx0]]
+            HexaNumeral           => HexaNumeral[[Ctx0]]
+            DeciNumeral           => DeciNumeral[[Ctx0]]
+            OctaLiteral           => OctaLiteral[[Ctx0]]
+            HexaLiteral           => HexaLiteral[[Ctx0]]
+            DeciLiteral           => DeciLiteral[[Ctx0]]
+            Modifier              => Modifier[[Ctx0]]
+            StrictFP              => StrictFP[[Ctx0]]
+            Synchronized          => Synchronized[[Ctx0]]
+            Volatile              => Volatile[[Ctx0]]
+            Transient             => Transient[[Ctx0]]
+            Native                => Native[[Ctx0]]
+            Static                => Static[[Ctx0]]
+            Final                 => Final[[Ctx0]]
+            Abstract              => Abstract[[Ctx0]]
+            Protected             => Protected[[Ctx0]]
+            Private               => Private[[Ctx0]]
+            Public                => Public[[Ctx0]]
+            Id                    => Id[[Ctx0]]
+            ID                    => ID[[Ctx0]]
+            Keyword               => Keyword[[Ctx0]]
+            ArrayAccess           => ArrayAccess[[Ctx0]]
+            FieldAccess           => FieldAccess[[Ctx0]]
+            MethodSpec            => MethodSpec[[Ctx0]]
+            Expr                  => Expr[[Ctx0]] ]
+
+
+
+
+module languages/java/JavaMix[Ctx]
+imports
+  languages/java-15/JavaMix[Ctx]
+
+
+module languages/aspectj/JavaExtension[JavaCtx AspectCtx PointcutCtx PatternCtx]
+imports
+  languages/java/JavaMix[JavaCtx]
+  languages/java/JavaMix[AspectCtx]
+  languages/java/JavaMix[PointcutCtx]
+  languages/java/JavaMix[PatternCtx]
+
+  languages/aspectj/lexical/Keyword
+  languages/aspectj/aspect/Declaration[AspectCtx JavaCtx]
+  languages/aspectj/pattern/Main[PatternCtx]
+  languages/aspectj/pointcut/Declaration[PointcutCtx]
+  languages/aspectj/pointcut/Expression[PointcutCtx JavaCtx]
+
+exports
+  context-free syntax
+    AspectDec -> TypeDec[[JavaCtx]]
+
+    AspectDec   -> ClassMemberDec[[JavaCtx]]
+    PointcutDec -> ClassMemberDec[[JavaCtx]]
+
+    AspectDec   -> InterfaceMemberDec[[JavaCtx]]
+    PointcutDec -> InterfaceMemberDec[[JavaCtx]]
+
+
+module languages/aspectj/ajf/Main[JavaCtx AspectCtx PointcutCtx PatternCtx]
+imports
+  languages/aspectj/JavaExtension[JavaCtx AspectCtx PointcutCtx PatternCtx]
+  languages/aspectj/ajf/Keyword
+
+
+module languages/aspectj/ajf/Mix[Ctx0 JavaCtx AspectCtx PointcutCtx PatternCtx]
+imports 
+        languages/aspectj/ajf/Main[JavaCtx AspectCtx PointcutCtx PatternCtx]
+          [ TypeOrIdPattern                          => TypeOrIdPattern[[Ctx0]]
+            AnnoOrIdPattern                          => AnnoOrIdPattern[[Ctx0]]
+            AnnoOrId                                 => AnnoOrId[[Ctx0]]
+            PointcutName                             => PointcutName[[Ctx0]]
+            PrimPointcutName                         => PrimPointcutName[[Ctx0]]
+            PointcutBody                             => PointcutBody[[Ctx0]]
+            PointcutDecHead                          => PointcutDecHead[[Ctx0]]
+            PointcutDec                              => PointcutDec[[Ctx0]]
+            AnnoPatternPlus                          => AnnoPatternPlus[[Ctx0]]
+            AnnoPattern                              => AnnoPattern[[Ctx0]]
+            NotSimpleAnnoPattern                     => NotSimpleAnnoPattern[[Ctx0]]
+            SimpleAnnoPattern                        => SimpleAnnoPattern[[Ctx0]]
+            ElementPattern                           => ElementPattern[[Ctx0]]
+            ExceptionPattern                         => ExceptionPattern[[Ctx0]]
+            ThrowsPattern                            => ThrowsPattern[[Ctx0]]
+            FieldModPattern                          => FieldModPattern[[Ctx0]]
+            ConstrModPattern                         => ConstrModPattern[[Ctx0]]
+            MethodModPattern                         => MethodModPattern[[Ctx0]]
+            NotConstrMod                             => NotConstrMod[[Ctx0]]
+            NotFieldMod                              => NotFieldMod[[Ctx0]]
+            NotMethodMod                             => NotMethodMod[[Ctx0]]
+            ConstrNamePattern                        => ConstrNamePattern[[Ctx0]]
+            ClassMemberNamePattern                   => ClassMemberNamePattern[[Ctx0]]
+            FieldPattern                             => FieldPattern[[Ctx0]]
+            MethodConstrPattern                      => MethodConstrPattern[[Ctx0]]
+            ConstrPattern                            => ConstrPattern[[Ctx0]]
+            MethodPattern                            => MethodPattern[[Ctx0]]
+            TypeBoundPattern                         => TypeBoundPattern[[Ctx0]]
+            TypeParamsPattern                        => TypeParamsPattern[[Ctx0]]
+            TypeParamPattern                         => TypeParamPattern[[Ctx0]]
+            TopTypePattern                           => TopTypePattern[[Ctx0]]
+            TypeDecSpecPattern                       => TypeDecSpecPattern[[Ctx0]]
+            BaseTypePattern                          => BaseTypePattern[[Ctx0]]
+            CompilationUnit[[PlainJavaTheCtx]]       => CompilationUnit[[Ctx0,PlainJavaTheCtx]]
+            TypeDec[[PlainJavaTheCtx]]               => TypeDec[[Ctx0,PlainJavaTheCtx]]
+            ImportDec[[PlainJavaTheCtx]]             => ImportDec[[Ctx0,PlainJavaTheCtx]]
+            PackageDec[[PlainJavaTheCtx]]            => PackageDec[[Ctx0,PlainJavaTheCtx]]
+            ElemVal[[PlainJavaTheCtx]]               => ElemVal[[Ctx0,PlainJavaTheCtx]]
+            ElemValPair[[PlainJavaTheCtx]]           => ElemValPair[[Ctx0,PlainJavaTheCtx]]
+            Anno[[PlainJavaTheCtx]]                  => Anno[[Ctx0,PlainJavaTheCtx]]
+            LHS[[PlainJavaTheCtx]]                   => LHS[[Ctx0,PlainJavaTheCtx]]
+            CondMid[[PlainJavaTheCtx]]               => CondMid[[Ctx0,PlainJavaTheCtx]]
+            ArraySubscript[[PlainJavaTheCtx]]        => ArraySubscript[[Ctx0,PlainJavaTheCtx]]
+            DimExpr[[PlainJavaTheCtx]]               => DimExpr[[Ctx0,PlainJavaTheCtx]]
+            ArrayBaseType[[PlainJavaTheCtx]]         => ArrayBaseType[[Ctx0,PlainJavaTheCtx]]
+            ArrayCreationExpr[[PlainJavaTheCtx]]     => ArrayCreationExpr[[Ctx0,PlainJavaTheCtx]]
+            ClassMemberDec[[PlainJavaTheCtx]]        => ClassMemberDec[[Ctx0,PlainJavaTheCtx]]
+            ClassBodyDec[[PlainJavaTheCtx]]          => ClassBodyDec[[Ctx0,PlainJavaTheCtx]]
+            Interfaces[[PlainJavaTheCtx]]            => Interfaces[[Ctx0,PlainJavaTheCtx]]
+            Super[[PlainJavaTheCtx]]                 => Super[[Ctx0,PlainJavaTheCtx]]
+            ClassMod[[PlainJavaTheCtx]]              => ClassMod[[Ctx0,PlainJavaTheCtx]]
+            ClassDecHead[[PlainJavaTheCtx]]          => ClassDecHead[[Ctx0,PlainJavaTheCtx]]
+            ClassBody[[PlainJavaTheCtx]]             => ClassBody[[Ctx0,PlainJavaTheCtx]]
+            ClassDec[[PlainJavaTheCtx]]              => ClassDec[[Ctx0,PlainJavaTheCtx]]
+            InterfaceMod[[PlainJavaTheCtx]]          => InterfaceMod[[Ctx0,PlainJavaTheCtx]]
+            InterfaceMemberDec[[PlainJavaTheCtx]]    => InterfaceMemberDec[[Ctx0,PlainJavaTheCtx]]
+            ExtendsInterfaces[[PlainJavaTheCtx]]     => ExtendsInterfaces[[Ctx0,PlainJavaTheCtx]]
+            InterfaceDecHead[[PlainJavaTheCtx]]      => InterfaceDecHead[[Ctx0,PlainJavaTheCtx]]
+            InterfaceDec[[PlainJavaTheCtx]]          => InterfaceDec[[Ctx0,PlainJavaTheCtx]]
+            DefaultVal[[PlainJavaTheCtx]]            => DefaultVal[[Ctx0,PlainJavaTheCtx]]
+            AnnoElemDec[[PlainJavaTheCtx]]           => AnnoElemDec[[Ctx0,PlainJavaTheCtx]]
+            AnnoDecHead[[PlainJavaTheCtx]]           => AnnoDecHead[[Ctx0,PlainJavaTheCtx]]
+            AnnoDec[[PlainJavaTheCtx]]               => AnnoDec[[Ctx0,PlainJavaTheCtx]]
+            AbstractMethodMod[[PlainJavaTheCtx]]     => AbstractMethodMod[[Ctx0,PlainJavaTheCtx]]
+            AbstractMethodDec[[PlainJavaTheCtx]]     => AbstractMethodDec[[Ctx0,PlainJavaTheCtx]]
+            ConstantMod[[PlainJavaTheCtx]]           => ConstantMod[[Ctx0,PlainJavaTheCtx]]
+            ConstantDec[[PlainJavaTheCtx]]           => ConstantDec[[Ctx0,PlainJavaTheCtx]]
+            EnumBodyDecs[[PlainJavaTheCtx]]          => EnumBodyDecs[[Ctx0,PlainJavaTheCtx]]
+            EnumConstArgs[[PlainJavaTheCtx]]         => EnumConstArgs[[Ctx0,PlainJavaTheCtx]]
+            EnumConst[[PlainJavaTheCtx]]             => EnumConst[[Ctx0,PlainJavaTheCtx]]
+            EnumBody[[PlainJavaTheCtx]]              => EnumBody[[Ctx0,PlainJavaTheCtx]]
+            EnumDecHead[[PlainJavaTheCtx]]           => EnumDecHead[[Ctx0,PlainJavaTheCtx]]
+            EnumDec[[PlainJavaTheCtx]]               => EnumDec[[Ctx0,PlainJavaTheCtx]]
+            ConstrMod[[PlainJavaTheCtx]]             => ConstrMod[[Ctx0,PlainJavaTheCtx]]
+            ConstrInv[[PlainJavaTheCtx]]             => ConstrInv[[Ctx0,PlainJavaTheCtx]]
+            ConstrBody[[PlainJavaTheCtx]]            => ConstrBody[[Ctx0,PlainJavaTheCtx]]
+            ConstrHead[[PlainJavaTheCtx]]            => ConstrHead[[Ctx0,PlainJavaTheCtx]]
+            ConstrDec[[PlainJavaTheCtx]]             => ConstrDec[[Ctx0,PlainJavaTheCtx]]
+            StaticInit[[PlainJavaTheCtx]]            => StaticInit[[Ctx0,PlainJavaTheCtx]]
+            InstanceInit[[PlainJavaTheCtx]]          => InstanceInit[[Ctx0,PlainJavaTheCtx]]
+            MethodBody[[PlainJavaTheCtx]]            => MethodBody[[Ctx0,PlainJavaTheCtx]]
+            ExceptionType[[PlainJavaTheCtx]]         => ExceptionType[[Ctx0,PlainJavaTheCtx]]
+            Throws[[PlainJavaTheCtx]]                => Throws[[Ctx0,PlainJavaTheCtx]]
+            MethodMod[[PlainJavaTheCtx]]             => MethodMod[[Ctx0,PlainJavaTheCtx]]
+            VarMod[[PlainJavaTheCtx]]                => VarMod[[Ctx0,PlainJavaTheCtx]]
+            FormalParam[[PlainJavaTheCtx]]           => FormalParam[[Ctx0,PlainJavaTheCtx]]
+            ResultType[[PlainJavaTheCtx]]            => ResultType[[Ctx0,PlainJavaTheCtx]]
+            MethodDecHead[[PlainJavaTheCtx]]         => MethodDecHead[[Ctx0,PlainJavaTheCtx]]
+            MethodDec[[PlainJavaTheCtx]]             => MethodDec[[Ctx0,PlainJavaTheCtx]]
+            BlockStm[[PlainJavaTheCtx]]              => BlockStm[[Ctx0,PlainJavaTheCtx]]
+            Block[[PlainJavaTheCtx]]                 => Block[[Ctx0,PlainJavaTheCtx]]
+            CatchClause[[PlainJavaTheCtx]]           => CatchClause[[Ctx0,PlainJavaTheCtx]]
+            SwitchLabel[[PlainJavaTheCtx]]           => SwitchLabel[[Ctx0,PlainJavaTheCtx]]
+            SwitchGroup[[PlainJavaTheCtx]]           => SwitchGroup[[Ctx0,PlainJavaTheCtx]]
+            SwitchBlock[[PlainJavaTheCtx]]           => SwitchBlock[[Ctx0,PlainJavaTheCtx]]
+            Stm[[PlainJavaTheCtx]]                   => Stm[[Ctx0,PlainJavaTheCtx]]
+            LocalVarDec[[PlainJavaTheCtx]]           => LocalVarDec[[Ctx0,PlainJavaTheCtx]]
+            LocalVarDecStm[[PlainJavaTheCtx]]        => LocalVarDecStm[[Ctx0,PlainJavaTheCtx]]
+            FieldMod[[PlainJavaTheCtx]]              => FieldMod[[Ctx0,PlainJavaTheCtx]]
+            VarInit[[PlainJavaTheCtx]]               => VarInit[[Ctx0,PlainJavaTheCtx]]
+            Dim[[PlainJavaTheCtx]]                   => Dim[[Ctx0,PlainJavaTheCtx]]
+            VarDecId[[PlainJavaTheCtx]]              => VarDecId[[Ctx0,PlainJavaTheCtx]]
+            VarDec[[PlainJavaTheCtx]]                => VarDec[[Ctx0,PlainJavaTheCtx]]
+            FieldDec[[PlainJavaTheCtx]]              => FieldDec[[Ctx0,PlainJavaTheCtx]]
+            ArrayInit[[PlainJavaTheCtx]]             => ArrayInit[[Ctx0,PlainJavaTheCtx]]
+            ClassLiteral[[PlainJavaTheCtx]]          => ClassLiteral[[Ctx0,PlainJavaTheCtx]]
+            Literal[[PlainJavaTheCtx]]               => Literal[[Ctx0,PlainJavaTheCtx]]
+            Type[[PlainJavaTheCtx]]                  => Type[[Ctx0,PlainJavaTheCtx]]
+            ArrayType[[PlainJavaTheCtx]]             => ArrayType[[Ctx0,PlainJavaTheCtx]]
+            TypeVar[[PlainJavaTheCtx]]               => TypeVar[[Ctx0,PlainJavaTheCtx]]
+            TypeDecSpec[[PlainJavaTheCtx]]           => TypeDecSpec[[Ctx0,PlainJavaTheCtx]]
+            InterfaceType[[PlainJavaTheCtx]]         => InterfaceType[[Ctx0,PlainJavaTheCtx]]
+            ClassType[[PlainJavaTheCtx]]             => ClassType[[Ctx0,PlainJavaTheCtx]]
+            ClassOrInterfaceType[[PlainJavaTheCtx]]  => ClassOrInterfaceType[[Ctx0,PlainJavaTheCtx]]
+            RefType[[PlainJavaTheCtx]]               => RefType[[Ctx0,PlainJavaTheCtx]]
+            TypeVarId[[PlainJavaTheCtx]]             => TypeVarId[[Ctx0,PlainJavaTheCtx]]
+            TypeParams[[PlainJavaTheCtx]]            => TypeParams[[Ctx0,PlainJavaTheCtx]]
+            TypeBound[[PlainJavaTheCtx]]             => TypeBound[[Ctx0,PlainJavaTheCtx]]
+            TypeParam[[PlainJavaTheCtx]]             => TypeParam[[Ctx0,PlainJavaTheCtx]]
+            WildcardBound[[PlainJavaTheCtx]]         => WildcardBound[[Ctx0,PlainJavaTheCtx]]
+            ActualTypeArg[[PlainJavaTheCtx]]         => ActualTypeArg[[Ctx0,PlainJavaTheCtx]]
+            TypeArgs[[PlainJavaTheCtx]]              => TypeArgs[[Ctx0,PlainJavaTheCtx]]
+            PackageOrTypeName[[PlainJavaTheCtx]]     => PackageOrTypeName[[Ctx0,PlainJavaTheCtx]]
+            MethodName[[PlainJavaTheCtx]]            => MethodName[[Ctx0,PlainJavaTheCtx]]
+            ExprName[[PlainJavaTheCtx]]              => ExprName[[Ctx0,PlainJavaTheCtx]]
+            TypeName[[PlainJavaTheCtx]]              => TypeName[[Ctx0,PlainJavaTheCtx]]
+            AmbName[[PlainJavaTheCtx]]               => AmbName[[Ctx0,PlainJavaTheCtx]]
+            PackageName[[PlainJavaTheCtx]]           => PackageName[[Ctx0,PlainJavaTheCtx]]
+            FloatType[[PlainJavaTheCtx]]             => FloatType[[Ctx0,PlainJavaTheCtx]]
+            IntType[[PlainJavaTheCtx]]               => IntType[[Ctx0,PlainJavaTheCtx]]
+            NumType[[PlainJavaTheCtx]]               => NumType[[Ctx0,PlainJavaTheCtx]]
+            PrimType[[PlainJavaTheCtx]]              => PrimType[[Ctx0,PlainJavaTheCtx]]
+            NullLiteral[[PlainJavaTheCtx]]           => NullLiteral[[Ctx0,PlainJavaTheCtx]]
+            FooStringChars[[PlainJavaTheCtx]]        => FooStringChars[[Ctx0,PlainJavaTheCtx]]
+            StringChars[[PlainJavaTheCtx]]           => StringChars[[Ctx0,PlainJavaTheCtx]]
+            StringPart[[PlainJavaTheCtx]]            => StringPart[[Ctx0,PlainJavaTheCtx]]
+            StringLiteral[[PlainJavaTheCtx]]         => StringLiteral[[Ctx0,PlainJavaTheCtx]]
+            SingleChar[[PlainJavaTheCtx]]            => SingleChar[[Ctx0,PlainJavaTheCtx]]
+            CharContent[[PlainJavaTheCtx]]           => CharContent[[Ctx0,PlainJavaTheCtx]]
+            CharLiteral[[PlainJavaTheCtx]]           => CharLiteral[[Ctx0,PlainJavaTheCtx]]
+            LastOcta[[PlainJavaTheCtx]]              => LastOcta[[Ctx0,PlainJavaTheCtx]]
+            OctaEscape[[PlainJavaTheCtx]]            => OctaEscape[[Ctx0,PlainJavaTheCtx]]
+            NamedEscape[[PlainJavaTheCtx]]           => NamedEscape[[Ctx0,PlainJavaTheCtx]]
+            EscapeSeq[[PlainJavaTheCtx]]             => EscapeSeq[[Ctx0,PlainJavaTheCtx]]
+            Bool[[PlainJavaTheCtx]]                  => Bool[[Ctx0,PlainJavaTheCtx]]
+            BoolLiteral[[PlainJavaTheCtx]]           => BoolLiteral[[Ctx0,PlainJavaTheCtx]]
+            BinaryExponent[[PlainJavaTheCtx]]        => BinaryExponent[[Ctx0,PlainJavaTheCtx]]
+            HexaSignificand[[PlainJavaTheCtx]]       => HexaSignificand[[Ctx0,PlainJavaTheCtx]]
+            HexaFloatNumeral[[PlainJavaTheCtx]]      => HexaFloatNumeral[[Ctx0,PlainJavaTheCtx]]
+            SignedInteger[[PlainJavaTheCtx]]         => SignedInteger[[Ctx0,PlainJavaTheCtx]]
+            DeciFloatExponentPart[[PlainJavaTheCtx]] => DeciFloatExponentPart[[Ctx0,PlainJavaTheCtx]]
+            DeciFloatDigits[[PlainJavaTheCtx]]       => DeciFloatDigits[[Ctx0,PlainJavaTheCtx]]
+            DeciFloatNumeral[[PlainJavaTheCtx]]      => DeciFloatNumeral[[Ctx0,PlainJavaTheCtx]]
+            FloatLiteral[[PlainJavaTheCtx]]          => FloatLiteral[[Ctx0,PlainJavaTheCtx]]
+            HexaFloatLiteral[[PlainJavaTheCtx]]      => HexaFloatLiteral[[Ctx0,PlainJavaTheCtx]]
+            DeciFloatLiteral[[PlainJavaTheCtx]]      => DeciFloatLiteral[[Ctx0,PlainJavaTheCtx]]
+            IntLiteral[[PlainJavaTheCtx]]            => IntLiteral[[Ctx0,PlainJavaTheCtx]]
+            OctaNumeral[[PlainJavaTheCtx]]           => OctaNumeral[[Ctx0,PlainJavaTheCtx]]
+            HexaNumeral[[PlainJavaTheCtx]]           => HexaNumeral[[Ctx0,PlainJavaTheCtx]]
+            DeciNumeral[[PlainJavaTheCtx]]           => DeciNumeral[[Ctx0,PlainJavaTheCtx]]
+            OctaLiteral[[PlainJavaTheCtx]]           => OctaLiteral[[Ctx0,PlainJavaTheCtx]]
+            HexaLiteral[[PlainJavaTheCtx]]           => HexaLiteral[[Ctx0,PlainJavaTheCtx]]
+            DeciLiteral[[PlainJavaTheCtx]]           => DeciLiteral[[Ctx0,PlainJavaTheCtx]]
+            Modifier[[PlainJavaTheCtx]]              => Modifier[[Ctx0,PlainJavaTheCtx]]
+            StrictFP[[PlainJavaTheCtx]]              => StrictFP[[Ctx0,PlainJavaTheCtx]]
+            Synchronized[[PlainJavaTheCtx]]          => Synchronized[[Ctx0,PlainJavaTheCtx]]
+            Volatile[[PlainJavaTheCtx]]              => Volatile[[Ctx0,PlainJavaTheCtx]]
+            Transient[[PlainJavaTheCtx]]             => Transient[[Ctx0,PlainJavaTheCtx]]
+            Native[[PlainJavaTheCtx]]                => Native[[Ctx0,PlainJavaTheCtx]]
+            Static[[PlainJavaTheCtx]]                => Static[[Ctx0,PlainJavaTheCtx]]
+            Final[[PlainJavaTheCtx]]                 => Final[[Ctx0,PlainJavaTheCtx]]
+            Abstract[[PlainJavaTheCtx]]              => Abstract[[Ctx0,PlainJavaTheCtx]]
+            Protected[[PlainJavaTheCtx]]             => Protected[[Ctx0,PlainJavaTheCtx]]
+            Private[[PlainJavaTheCtx]]               => Private[[Ctx0,PlainJavaTheCtx]]
+            Public[[PlainJavaTheCtx]]                => Public[[Ctx0,PlainJavaTheCtx]]
+            Id[[PlainJavaTheCtx]]                    => Id[[Ctx0,PlainJavaTheCtx]]
+            ID[[PlainJavaTheCtx]]                    => ID[[Ctx0,PlainJavaTheCtx]]
+            Keyword[[PlainJavaTheCtx]]               => Keyword[[Ctx0,PlainJavaTheCtx]]
+            IdPattern                                => IdPattern[[Ctx0]]
+            NamePattern                              => NamePattern[[Ctx0]]
+            FormalPattern                            => FormalPattern[[Ctx0]]
+            AspectMod                                => AspectMod[[Ctx0]]
+            AspectBody                               => AspectBody[[Ctx0]]
+            PerClause                                => PerClause[[Ctx0]]
+            AspectDecHead                            => AspectDecHead[[Ctx0]]
+            AspectDec                                => AspectDec[[Ctx0]]
+            AspectBodyDec                            => AspectBodyDec[[Ctx0]]
+            IntertypeConstrDecHead                   => IntertypeConstrDecHead[[Ctx0]]
+            IntertypeMethodDecHead                   => IntertypeMethodDecHead[[Ctx0]]
+            IntertypeMemberDec                       => IntertypeMemberDec[[Ctx0]]
+            ExitStatus                               => ExitStatus[[Ctx0]]
+            AdviceSpec                               => AdviceSpec[[Ctx0]]
+            AdviceMod                                => AdviceMod[[Ctx0]]
+            AdviceDec                                => AdviceDec[[Ctx0]]
+            Parent                                   => Parent[[Ctx0]]
+            AnnoDeclKind                             => AnnoDeclKind[[Ctx0]]
+            DeclareDec                               => DeclareDec[[Ctx0]]
+            CompilationUnit[[PatternCtx]]            => CompilationUnit[[Ctx0,PatternCtx]]
+            TypeDec[[PatternCtx]]                    => TypeDec[[Ctx0,PatternCtx]]
+            ImportDec[[PatternCtx]]                  => ImportDec[[Ctx0,PatternCtx]]
+            PackageDec[[PatternCtx]]                 => PackageDec[[Ctx0,PatternCtx]]
+            ElemVal[[PatternCtx]]                    => ElemVal[[Ctx0,PatternCtx]]
+            ElemValPair[[PatternCtx]]                => ElemValPair[[Ctx0,PatternCtx]]
+            Anno[[PatternCtx]]                       => Anno[[Ctx0,PatternCtx]]
+            LHS[[PatternCtx]]                        => LHS[[Ctx0,PatternCtx]]
+            CondMid[[PatternCtx]]                    => CondMid[[Ctx0,PatternCtx]]
+            ArraySubscript[[PatternCtx]]             => ArraySubscript[[Ctx0,PatternCtx]]
+            DimExpr[[PatternCtx]]                    => DimExpr[[Ctx0,PatternCtx]]
+            ArrayBaseType[[PatternCtx]]              => ArrayBaseType[[Ctx0,PatternCtx]]
+            ArrayCreationExpr[[PatternCtx]]          => ArrayCreationExpr[[Ctx0,PatternCtx]]
+            ClassMemberDec[[PatternCtx]]             => ClassMemberDec[[Ctx0,PatternCtx]]
+            ClassBodyDec[[PatternCtx]]               => ClassBodyDec[[Ctx0,PatternCtx]]
+            Interfaces[[PatternCtx]]                 => Interfaces[[Ctx0,PatternCtx]]
+            Super[[PatternCtx]]                      => Super[[Ctx0,PatternCtx]]
+            ClassMod[[PatternCtx]]                   => ClassMod[[Ctx0,PatternCtx]]
+            ClassDecHead[[PatternCtx]]               => ClassDecHead[[Ctx0,PatternCtx]]
+            ClassBody[[PatternCtx]]                  => ClassBody[[Ctx0,PatternCtx]]
+            ClassDec[[PatternCtx]]                   => ClassDec[[Ctx0,PatternCtx]]
+            InterfaceMod[[PatternCtx]]               => InterfaceMod[[Ctx0,PatternCtx]]
+            InterfaceMemberDec[[PatternCtx]]         => InterfaceMemberDec[[Ctx0,PatternCtx]]
+            ExtendsInterfaces[[PatternCtx]]          => ExtendsInterfaces[[Ctx0,PatternCtx]]
+            InterfaceDecHead[[PatternCtx]]           => InterfaceDecHead[[Ctx0,PatternCtx]]
+            InterfaceDec[[PatternCtx]]               => InterfaceDec[[Ctx0,PatternCtx]]
+            DefaultVal[[PatternCtx]]                 => DefaultVal[[Ctx0,PatternCtx]]
+            AnnoElemDec[[PatternCtx]]                => AnnoElemDec[[Ctx0,PatternCtx]]
+            AnnoDecHead[[PatternCtx]]                => AnnoDecHead[[Ctx0,PatternCtx]]
+            AnnoDec[[PatternCtx]]                    => AnnoDec[[Ctx0,PatternCtx]]
+            AbstractMethodMod[[PatternCtx]]          => AbstractMethodMod[[Ctx0,PatternCtx]]
+            AbstractMethodDec[[PatternCtx]]          => AbstractMethodDec[[Ctx0,PatternCtx]]
+            ConstantMod[[PatternCtx]]                => ConstantMod[[Ctx0,PatternCtx]]
+            ConstantDec[[PatternCtx]]                => ConstantDec[[Ctx0,PatternCtx]]
+            EnumBodyDecs[[PatternCtx]]               => EnumBodyDecs[[Ctx0,PatternCtx]]
+            EnumConstArgs[[PatternCtx]]              => EnumConstArgs[[Ctx0,PatternCtx]]
+            EnumConst[[PatternCtx]]                  => EnumConst[[Ctx0,PatternCtx]]
+            EnumBody[[PatternCtx]]                   => EnumBody[[Ctx0,PatternCtx]]
+            EnumDecHead[[PatternCtx]]                => EnumDecHead[[Ctx0,PatternCtx]]
+            EnumDec[[PatternCtx]]                    => EnumDec[[Ctx0,PatternCtx]]
+            ConstrMod[[PatternCtx]]                  => ConstrMod[[Ctx0,PatternCtx]]
+            ConstrInv[[PatternCtx]]                  => ConstrInv[[Ctx0,PatternCtx]]
+            ConstrBody[[PatternCtx]]                 => ConstrBody[[Ctx0,PatternCtx]]
+            ConstrHead[[PatternCtx]]                 => ConstrHead[[Ctx0,PatternCtx]]
+            ConstrDec[[PatternCtx]]                  => ConstrDec[[Ctx0,PatternCtx]]
+            StaticInit[[PatternCtx]]                 => StaticInit[[Ctx0,PatternCtx]]
+            InstanceInit[[PatternCtx]]               => InstanceInit[[Ctx0,PatternCtx]]
+            MethodBody[[PatternCtx]]                 => MethodBody[[Ctx0,PatternCtx]]
+            ExceptionType[[PatternCtx]]              => ExceptionType[[Ctx0,PatternCtx]]
+            Throws[[PatternCtx]]                     => Throws[[Ctx0,PatternCtx]]
+            MethodMod[[PatternCtx]]                  => MethodMod[[Ctx0,PatternCtx]]
+            VarMod[[PatternCtx]]                     => VarMod[[Ctx0,PatternCtx]]
+            FormalParam[[PatternCtx]]                => FormalParam[[Ctx0,PatternCtx]]
+            ResultType[[PatternCtx]]                 => ResultType[[Ctx0,PatternCtx]]
+            MethodDecHead[[PatternCtx]]              => MethodDecHead[[Ctx0,PatternCtx]]
+            MethodDec[[PatternCtx]]                  => MethodDec[[Ctx0,PatternCtx]]
+            BlockStm[[PatternCtx]]                   => BlockStm[[Ctx0,PatternCtx]]
+            Block[[PatternCtx]]                      => Block[[Ctx0,PatternCtx]]
+            CatchClause[[PatternCtx]]                => CatchClause[[Ctx0,PatternCtx]]
+            SwitchLabel[[PatternCtx]]                => SwitchLabel[[Ctx0,PatternCtx]]
+            SwitchGroup[[PatternCtx]]                => SwitchGroup[[Ctx0,PatternCtx]]
+            SwitchBlock[[PatternCtx]]                => SwitchBlock[[Ctx0,PatternCtx]]
+            Stm[[PatternCtx]]                        => Stm[[Ctx0,PatternCtx]]
+            LocalVarDec[[PatternCtx]]                => LocalVarDec[[Ctx0,PatternCtx]]
+            LocalVarDecStm[[PatternCtx]]             => LocalVarDecStm[[Ctx0,PatternCtx]]
+            FieldMod[[PatternCtx]]                   => FieldMod[[Ctx0,PatternCtx]]
+            VarInit[[PatternCtx]]                    => VarInit[[Ctx0,PatternCtx]]
+            Dim[[PatternCtx]]                        => Dim[[Ctx0,PatternCtx]]
+            VarDecId[[PatternCtx]]                   => VarDecId[[Ctx0,PatternCtx]]
+            VarDec[[PatternCtx]]                     => VarDec[[Ctx0,PatternCtx]]
+            FieldDec[[PatternCtx]]                   => FieldDec[[Ctx0,PatternCtx]]
+            ArrayInit[[PatternCtx]]                  => ArrayInit[[Ctx0,PatternCtx]]
+            ClassLiteral[[PatternCtx]]               => ClassLiteral[[Ctx0,PatternCtx]]
+            Literal[[PatternCtx]]                    => Literal[[Ctx0,PatternCtx]]
+            Type[[PatternCtx]]                       => Type[[Ctx0,PatternCtx]]
+            ArrayType[[PatternCtx]]                  => ArrayType[[Ctx0,PatternCtx]]
+            TypeVar[[PatternCtx]]                    => TypeVar[[Ctx0,PatternCtx]]
+            TypeDecSpec[[PatternCtx]]                => TypeDecSpec[[Ctx0,PatternCtx]]
+            InterfaceType[[PatternCtx]]              => InterfaceType[[Ctx0,PatternCtx]]
+            ClassType[[PatternCtx]]                  => ClassType[[Ctx0,PatternCtx]]
+            ClassOrInterfaceType[[PatternCtx]]       => ClassOrInterfaceType[[Ctx0,PatternCtx]]
+            RefType[[PatternCtx]]                    => RefType[[Ctx0,PatternCtx]]
+            TypeVarId[[PatternCtx]]                  => TypeVarId[[Ctx0,PatternCtx]]
+            TypeParams[[PatternCtx]]                 => TypeParams[[Ctx0,PatternCtx]]
+            TypeBound[[PatternCtx]]                  => TypeBound[[Ctx0,PatternCtx]]
+            TypeParam[[PatternCtx]]                  => TypeParam[[Ctx0,PatternCtx]]
+            WildcardBound[[PatternCtx]]              => WildcardBound[[Ctx0,PatternCtx]]
+            ActualTypeArg[[PatternCtx]]              => ActualTypeArg[[Ctx0,PatternCtx]]
+            TypeArgs[[PatternCtx]]                   => TypeArgs[[Ctx0,PatternCtx]]
+            PackageOrTypeName[[PatternCtx]]          => PackageOrTypeName[[Ctx0,PatternCtx]]
+            MethodName[[PatternCtx]]                 => MethodName[[Ctx0,PatternCtx]]
+            ExprName[[PatternCtx]]                   => ExprName[[Ctx0,PatternCtx]]
+            TypeName[[PatternCtx]]                   => TypeName[[Ctx0,PatternCtx]]
+            AmbName[[PatternCtx]]                    => AmbName[[Ctx0,PatternCtx]]
+            PackageName[[PatternCtx]]                => PackageName[[Ctx0,PatternCtx]]
+            FloatType[[PatternCtx]]                  => FloatType[[Ctx0,PatternCtx]]
+            IntType[[PatternCtx]]                    => IntType[[Ctx0,PatternCtx]]
+            NumType[[PatternCtx]]                    => NumType[[Ctx0,PatternCtx]]
+            PrimType[[PatternCtx]]                   => PrimType[[Ctx0,PatternCtx]]
+            NullLiteral[[PatternCtx]]                => NullLiteral[[Ctx0,PatternCtx]]
+            FooStringChars[[PatternCtx]]             => FooStringChars[[Ctx0,PatternCtx]]
+            StringChars[[PatternCtx]]                => StringChars[[Ctx0,PatternCtx]]
+            StringPart[[PatternCtx]]                 => StringPart[[Ctx0,PatternCtx]]
+            StringLiteral[[PatternCtx]]              => StringLiteral[[Ctx0,PatternCtx]]
+            SingleChar[[PatternCtx]]                 => SingleChar[[Ctx0,PatternCtx]]
+            CharContent[[PatternCtx]]                => CharContent[[Ctx0,PatternCtx]]
+            CharLiteral[[PatternCtx]]                => CharLiteral[[Ctx0,PatternCtx]]
+            LastOcta[[PatternCtx]]                   => LastOcta[[Ctx0,PatternCtx]]
+            OctaEscape[[PatternCtx]]                 => OctaEscape[[Ctx0,PatternCtx]]
+            NamedEscape[[PatternCtx]]                => NamedEscape[[Ctx0,PatternCtx]]
+            EscapeSeq[[PatternCtx]]                  => EscapeSeq[[Ctx0,PatternCtx]]
+            Bool[[PatternCtx]]                       => Bool[[Ctx0,PatternCtx]]
+            BoolLiteral[[PatternCtx]]                => BoolLiteral[[Ctx0,PatternCtx]]
+            BinaryExponent[[PatternCtx]]             => BinaryExponent[[Ctx0,PatternCtx]]
+            HexaSignificand[[PatternCtx]]            => HexaSignificand[[Ctx0,PatternCtx]]
+            HexaFloatNumeral[[PatternCtx]]           => HexaFloatNumeral[[Ctx0,PatternCtx]]
+            SignedInteger[[PatternCtx]]              => SignedInteger[[Ctx0,PatternCtx]]
+            DeciFloatExponentPart[[PatternCtx]]      => DeciFloatExponentPart[[Ctx0,PatternCtx]]
+            DeciFloatDigits[[PatternCtx]]            => DeciFloatDigits[[Ctx0,PatternCtx]]
+            DeciFloatNumeral[[PatternCtx]]           => DeciFloatNumeral[[Ctx0,PatternCtx]]
+            FloatLiteral[[PatternCtx]]               => FloatLiteral[[Ctx0,PatternCtx]]
+            HexaFloatLiteral[[PatternCtx]]           => HexaFloatLiteral[[Ctx0,PatternCtx]]
+            DeciFloatLiteral[[PatternCtx]]           => DeciFloatLiteral[[Ctx0,PatternCtx]]
+            IntLiteral[[PatternCtx]]                 => IntLiteral[[Ctx0,PatternCtx]]
+            OctaNumeral[[PatternCtx]]                => OctaNumeral[[Ctx0,PatternCtx]]
+            HexaNumeral[[PatternCtx]]                => HexaNumeral[[Ctx0,PatternCtx]]
+            DeciNumeral[[PatternCtx]]                => DeciNumeral[[Ctx0,PatternCtx]]
+            OctaLiteral[[PatternCtx]]                => OctaLiteral[[Ctx0,PatternCtx]]
+            HexaLiteral[[PatternCtx]]                => HexaLiteral[[Ctx0,PatternCtx]]
+            DeciLiteral[[PatternCtx]]                => DeciLiteral[[Ctx0,PatternCtx]]
+            Modifier[[PatternCtx]]                   => Modifier[[Ctx0,PatternCtx]]
+            StrictFP[[PatternCtx]]                   => StrictFP[[Ctx0,PatternCtx]]
+            Synchronized[[PatternCtx]]               => Synchronized[[Ctx0,PatternCtx]]
+            Volatile[[PatternCtx]]                   => Volatile[[Ctx0,PatternCtx]]
+            Transient[[PatternCtx]]                  => Transient[[Ctx0,PatternCtx]]
+            Native[[PatternCtx]]                     => Native[[Ctx0,PatternCtx]]
+            Static[[PatternCtx]]                     => Static[[Ctx0,PatternCtx]]
+            Final[[PatternCtx]]                      => Final[[Ctx0,PatternCtx]]
+            Abstract[[PatternCtx]]                   => Abstract[[Ctx0,PatternCtx]]
+            Protected[[PatternCtx]]                  => Protected[[Ctx0,PatternCtx]]
+            Private[[PatternCtx]]                    => Private[[Ctx0,PatternCtx]]
+            Public[[PatternCtx]]                     => Public[[Ctx0,PatternCtx]]
+            Id[[PatternCtx]]                         => Id[[Ctx0,PatternCtx]]
+            ID[[PatternCtx]]                         => ID[[Ctx0,PatternCtx]]
+            Keyword[[PatternCtx]]                    => Keyword[[Ctx0,PatternCtx]]
+            CompilationUnit[[PointcutCtx]]           => CompilationUnit[[Ctx0,PointcutCtx]]
+            TypeDec[[PointcutCtx]]                   => TypeDec[[Ctx0,PointcutCtx]]
+            ImportDec[[PointcutCtx]]                 => ImportDec[[Ctx0,PointcutCtx]]
+            PackageDec[[PointcutCtx]]                => PackageDec[[Ctx0,PointcutCtx]]
+            ElemVal[[PointcutCtx]]                   => ElemVal[[Ctx0,PointcutCtx]]
+            ElemValPair[[PointcutCtx]]               => ElemValPair[[Ctx0,PointcutCtx]]
+            Anno[[PointcutCtx]]                      => Anno[[Ctx0,PointcutCtx]]
+            LHS[[PointcutCtx]]                       => LHS[[Ctx0,PointcutCtx]]
+            CondMid[[PointcutCtx]]                   => CondMid[[Ctx0,PointcutCtx]]
+            ArraySubscript[[PointcutCtx]]            => ArraySubscript[[Ctx0,PointcutCtx]]
+            DimExpr[[PointcutCtx]]                   => DimExpr[[Ctx0,PointcutCtx]]
+            ArrayBaseType[[PointcutCtx]]             => ArrayBaseType[[Ctx0,PointcutCtx]]
+            ArrayCreationExpr[[PointcutCtx]]         => ArrayCreationExpr[[Ctx0,PointcutCtx]]
+            ClassMemberDec[[PointcutCtx]]            => ClassMemberDec[[Ctx0,PointcutCtx]]
+            ClassBodyDec[[PointcutCtx]]              => ClassBodyDec[[Ctx0,PointcutCtx]]
+            Interfaces[[PointcutCtx]]                => Interfaces[[Ctx0,PointcutCtx]]
+            Super[[PointcutCtx]]                     => Super[[Ctx0,PointcutCtx]]
+            ClassMod[[PointcutCtx]]                  => ClassMod[[Ctx0,PointcutCtx]]
+            ClassDecHead[[PointcutCtx]]              => ClassDecHead[[Ctx0,PointcutCtx]]
+            ClassBody[[PointcutCtx]]                 => ClassBody[[Ctx0,PointcutCtx]]
+            ClassDec[[PointcutCtx]]                  => ClassDec[[Ctx0,PointcutCtx]]
+            InterfaceMod[[PointcutCtx]]              => InterfaceMod[[Ctx0,PointcutCtx]]
+            InterfaceMemberDec[[PointcutCtx]]        => InterfaceMemberDec[[Ctx0,PointcutCtx]]
+            ExtendsInterfaces[[PointcutCtx]]         => ExtendsInterfaces[[Ctx0,PointcutCtx]]
+            InterfaceDecHead[[PointcutCtx]]          => InterfaceDecHead[[Ctx0,PointcutCtx]]
+            InterfaceDec[[PointcutCtx]]              => InterfaceDec[[Ctx0,PointcutCtx]]
+            DefaultVal[[PointcutCtx]]                => DefaultVal[[Ctx0,PointcutCtx]]
+            AnnoElemDec[[PointcutCtx]]               => AnnoElemDec[[Ctx0,PointcutCtx]]
+            AnnoDecHead[[PointcutCtx]]               => AnnoDecHead[[Ctx0,PointcutCtx]]
+            AnnoDec[[PointcutCtx]]                   => AnnoDec[[Ctx0,PointcutCtx]]
+            AbstractMethodMod[[PointcutCtx]]         => AbstractMethodMod[[Ctx0,PointcutCtx]]
+            AbstractMethodDec[[PointcutCtx]]         => AbstractMethodDec[[Ctx0,PointcutCtx]]
+            ConstantMod[[PointcutCtx]]               => ConstantMod[[Ctx0,PointcutCtx]]
+            ConstantDec[[PointcutCtx]]               => ConstantDec[[Ctx0,PointcutCtx]]
+            EnumBodyDecs[[PointcutCtx]]              => EnumBodyDecs[[Ctx0,PointcutCtx]]
+            EnumConstArgs[[PointcutCtx]]             => EnumConstArgs[[Ctx0,PointcutCtx]]
+            EnumConst[[PointcutCtx]]                 => EnumConst[[Ctx0,PointcutCtx]]
+            EnumBody[[PointcutCtx]]                  => EnumBody[[Ctx0,PointcutCtx]]
+            EnumDecHead[[PointcutCtx]]               => EnumDecHead[[Ctx0,PointcutCtx]]
+            EnumDec[[PointcutCtx]]                   => EnumDec[[Ctx0,PointcutCtx]]
+            ConstrMod[[PointcutCtx]]                 => ConstrMod[[Ctx0,PointcutCtx]]
+            ConstrInv[[PointcutCtx]]                 => ConstrInv[[Ctx0,PointcutCtx]]
+            ConstrBody[[PointcutCtx]]                => ConstrBody[[Ctx0,PointcutCtx]]
+            ConstrHead[[PointcutCtx]]                => ConstrHead[[Ctx0,PointcutCtx]]
+            ConstrDec[[PointcutCtx]]                 => ConstrDec[[Ctx0,PointcutCtx]]
+            StaticInit[[PointcutCtx]]                => StaticInit[[Ctx0,PointcutCtx]]
+            InstanceInit[[PointcutCtx]]              => InstanceInit[[Ctx0,PointcutCtx]]
+            MethodBody[[PointcutCtx]]                => MethodBody[[Ctx0,PointcutCtx]]
+            ExceptionType[[PointcutCtx]]             => ExceptionType[[Ctx0,PointcutCtx]]
+            Throws[[PointcutCtx]]                    => Throws[[Ctx0,PointcutCtx]]
+            MethodMod[[PointcutCtx]]                 => MethodMod[[Ctx0,PointcutCtx]]
+            VarMod[[PointcutCtx]]                    => VarMod[[Ctx0,PointcutCtx]]
+            FormalParam[[PointcutCtx]]               => FormalParam[[Ctx0,PointcutCtx]]
+            ResultType[[PointcutCtx]]                => ResultType[[Ctx0,PointcutCtx]]
+            MethodDecHead[[PointcutCtx]]             => MethodDecHead[[Ctx0,PointcutCtx]]
+            MethodDec[[PointcutCtx]]                 => MethodDec[[Ctx0,PointcutCtx]]
+            BlockStm[[PointcutCtx]]                  => BlockStm[[Ctx0,PointcutCtx]]
+            Block[[PointcutCtx]]                     => Block[[Ctx0,PointcutCtx]]
+            CatchClause[[PointcutCtx]]               => CatchClause[[Ctx0,PointcutCtx]]
+            SwitchLabel[[PointcutCtx]]               => SwitchLabel[[Ctx0,PointcutCtx]]
+            SwitchGroup[[PointcutCtx]]               => SwitchGroup[[Ctx0,PointcutCtx]]
+            SwitchBlock[[PointcutCtx]]               => SwitchBlock[[Ctx0,PointcutCtx]]
+            Stm[[PointcutCtx]]                       => Stm[[Ctx0,PointcutCtx]]
+            LocalVarDec[[PointcutCtx]]               => LocalVarDec[[Ctx0,PointcutCtx]]
+            LocalVarDecStm[[PointcutCtx]]            => LocalVarDecStm[[Ctx0,PointcutCtx]]
+            FieldMod[[PointcutCtx]]                  => FieldMod[[Ctx0,PointcutCtx]]
+            VarInit[[PointcutCtx]]                   => VarInit[[Ctx0,PointcutCtx]]
+            Dim[[PointcutCtx]]                       => Dim[[Ctx0,PointcutCtx]]
+            VarDecId[[PointcutCtx]]                  => VarDecId[[Ctx0,PointcutCtx]]
+            VarDec[[PointcutCtx]]                    => VarDec[[Ctx0,PointcutCtx]]
+            FieldDec[[PointcutCtx]]                  => FieldDec[[Ctx0,PointcutCtx]]
+            ArrayInit[[PointcutCtx]]                 => ArrayInit[[Ctx0,PointcutCtx]]
+            ClassLiteral[[PointcutCtx]]              => ClassLiteral[[Ctx0,PointcutCtx]]
+            Literal[[PointcutCtx]]                   => Literal[[Ctx0,PointcutCtx]]
+            Type[[PointcutCtx]]                      => Type[[Ctx0,PointcutCtx]]
+            ArrayType[[PointcutCtx]]                 => ArrayType[[Ctx0,PointcutCtx]]
+            TypeVar[[PointcutCtx]]                   => TypeVar[[Ctx0,PointcutCtx]]
+            TypeDecSpec[[PointcutCtx]]               => TypeDecSpec[[Ctx0,PointcutCtx]]
+            InterfaceType[[PointcutCtx]]             => InterfaceType[[Ctx0,PointcutCtx]]
+            ClassType[[PointcutCtx]]                 => ClassType[[Ctx0,PointcutCtx]]
+            ClassOrInterfaceType[[PointcutCtx]]      => ClassOrInterfaceType[[Ctx0,PointcutCtx]]
+            RefType[[PointcutCtx]]                   => RefType[[Ctx0,PointcutCtx]]
+            TypeVarId[[PointcutCtx]]                 => TypeVarId[[Ctx0,PointcutCtx]]
+            TypeParams[[PointcutCtx]]                => TypeParams[[Ctx0,PointcutCtx]]
+            TypeBound[[PointcutCtx]]                 => TypeBound[[Ctx0,PointcutCtx]]
+            TypeParam[[PointcutCtx]]                 => TypeParam[[Ctx0,PointcutCtx]]
+            WildcardBound[[PointcutCtx]]             => WildcardBound[[Ctx0,PointcutCtx]]
+            ActualTypeArg[[PointcutCtx]]             => ActualTypeArg[[Ctx0,PointcutCtx]]
+            TypeArgs[[PointcutCtx]]                  => TypeArgs[[Ctx0,PointcutCtx]]
+            PackageOrTypeName[[PointcutCtx]]         => PackageOrTypeName[[Ctx0,PointcutCtx]]
+            MethodName[[PointcutCtx]]                => MethodName[[Ctx0,PointcutCtx]]
+            ExprName[[PointcutCtx]]                  => ExprName[[Ctx0,PointcutCtx]]
+            TypeName[[PointcutCtx]]                  => TypeName[[Ctx0,PointcutCtx]]
+            AmbName[[PointcutCtx]]                   => AmbName[[Ctx0,PointcutCtx]]
+            PackageName[[PointcutCtx]]               => PackageName[[Ctx0,PointcutCtx]]
+            FloatType[[PointcutCtx]]                 => FloatType[[Ctx0,PointcutCtx]]
+            IntType[[PointcutCtx]]                   => IntType[[Ctx0,PointcutCtx]]
+            NumType[[PointcutCtx]]                   => NumType[[Ctx0,PointcutCtx]]
+            PrimType[[PointcutCtx]]                  => PrimType[[Ctx0,PointcutCtx]]
+            NullLiteral[[PointcutCtx]]               => NullLiteral[[Ctx0,PointcutCtx]]
+            FooStringChars[[PointcutCtx]]            => FooStringChars[[Ctx0,PointcutCtx]]
+            StringChars[[PointcutCtx]]               => StringChars[[Ctx0,PointcutCtx]]
+            StringPart[[PointcutCtx]]                => StringPart[[Ctx0,PointcutCtx]]
+            StringLiteral[[PointcutCtx]]             => StringLiteral[[Ctx0,PointcutCtx]]
+            SingleChar[[PointcutCtx]]                => SingleChar[[Ctx0,PointcutCtx]]
+            CharContent[[PointcutCtx]]               => CharContent[[Ctx0,PointcutCtx]]
+            CharLiteral[[PointcutCtx]]               => CharLiteral[[Ctx0,PointcutCtx]]
+            LastOcta[[PointcutCtx]]                  => LastOcta[[Ctx0,PointcutCtx]]
+            OctaEscape[[PointcutCtx]]                => OctaEscape[[Ctx0,PointcutCtx]]
+            NamedEscape[[PointcutCtx]]               => NamedEscape[[Ctx0,PointcutCtx]]
+            EscapeSeq[[PointcutCtx]]                 => EscapeSeq[[Ctx0,PointcutCtx]]
+            Bool[[PointcutCtx]]                      => Bool[[Ctx0,PointcutCtx]]
+            BoolLiteral[[PointcutCtx]]               => BoolLiteral[[Ctx0,PointcutCtx]]
+            BinaryExponent[[PointcutCtx]]            => BinaryExponent[[Ctx0,PointcutCtx]]
+            HexaSignificand[[PointcutCtx]]           => HexaSignificand[[Ctx0,PointcutCtx]]
+            HexaFloatNumeral[[PointcutCtx]]          => HexaFloatNumeral[[Ctx0,PointcutCtx]]
+            SignedInteger[[PointcutCtx]]             => SignedInteger[[Ctx0,PointcutCtx]]
+            DeciFloatExponentPart[[PointcutCtx]]     => DeciFloatExponentPart[[Ctx0,PointcutCtx]]
+            DeciFloatDigits[[PointcutCtx]]           => DeciFloatDigits[[Ctx0,PointcutCtx]]
+            DeciFloatNumeral[[PointcutCtx]]          => DeciFloatNumeral[[Ctx0,PointcutCtx]]
+            FloatLiteral[[PointcutCtx]]              => FloatLiteral[[Ctx0,PointcutCtx]]
+            HexaFloatLiteral[[PointcutCtx]]          => HexaFloatLiteral[[Ctx0,PointcutCtx]]
+            DeciFloatLiteral[[PointcutCtx]]          => DeciFloatLiteral[[Ctx0,PointcutCtx]]
+            IntLiteral[[PointcutCtx]]                => IntLiteral[[Ctx0,PointcutCtx]]
+            OctaNumeral[[PointcutCtx]]               => OctaNumeral[[Ctx0,PointcutCtx]]
+            HexaNumeral[[PointcutCtx]]               => HexaNumeral[[Ctx0,PointcutCtx]]
+            DeciNumeral[[PointcutCtx]]               => DeciNumeral[[Ctx0,PointcutCtx]]
+            OctaLiteral[[PointcutCtx]]               => OctaLiteral[[Ctx0,PointcutCtx]]
+            HexaLiteral[[PointcutCtx]]               => HexaLiteral[[Ctx0,PointcutCtx]]
+            DeciLiteral[[PointcutCtx]]               => DeciLiteral[[Ctx0,PointcutCtx]]
+            Modifier[[PointcutCtx]]                  => Modifier[[Ctx0,PointcutCtx]]
+            StrictFP[[PointcutCtx]]                  => StrictFP[[Ctx0,PointcutCtx]]
+            Synchronized[[PointcutCtx]]              => Synchronized[[Ctx0,PointcutCtx]]
+            Volatile[[PointcutCtx]]                  => Volatile[[Ctx0,PointcutCtx]]
+            Transient[[PointcutCtx]]                 => Transient[[Ctx0,PointcutCtx]]
+            Native[[PointcutCtx]]                    => Native[[Ctx0,PointcutCtx]]
+            Static[[PointcutCtx]]                    => Static[[Ctx0,PointcutCtx]]
+            Final[[PointcutCtx]]                     => Final[[Ctx0,PointcutCtx]]
+            Abstract[[PointcutCtx]]                  => Abstract[[Ctx0,PointcutCtx]]
+            Protected[[PointcutCtx]]                 => Protected[[Ctx0,PointcutCtx]]
+            Private[[PointcutCtx]]                   => Private[[Ctx0,PointcutCtx]]
+            Public[[PointcutCtx]]                    => Public[[Ctx0,PointcutCtx]]
+            Id[[PointcutCtx]]                        => Id[[Ctx0,PointcutCtx]]
+            ID[[PointcutCtx]]                        => ID[[Ctx0,PointcutCtx]]
+            Keyword[[PointcutCtx]]                   => Keyword[[Ctx0,PointcutCtx]]
+            CompilationUnit[[AspectCtx]]             => CompilationUnit[[Ctx0,AspectCtx]]
+            TypeDec[[AspectCtx]]                     => TypeDec[[Ctx0,AspectCtx]]
+            ImportDec[[AspectCtx]]                   => ImportDec[[Ctx0,AspectCtx]]
+            PackageDec[[AspectCtx]]                  => PackageDec[[Ctx0,AspectCtx]]
+            ElemVal[[AspectCtx]]                     => ElemVal[[Ctx0,AspectCtx]]
+            ElemValPair[[AspectCtx]]                 => ElemValPair[[Ctx0,AspectCtx]]
+            Anno[[AspectCtx]]                        => Anno[[Ctx0,AspectCtx]]
+            LHS[[AspectCtx]]                         => LHS[[Ctx0,AspectCtx]]
+            CondMid[[AspectCtx]]                     => CondMid[[Ctx0,AspectCtx]]
+            ArraySubscript[[AspectCtx]]              => ArraySubscript[[Ctx0,AspectCtx]]
+            DimExpr[[AspectCtx]]                     => DimExpr[[Ctx0,AspectCtx]]
+            ArrayBaseType[[AspectCtx]]               => ArrayBaseType[[Ctx0,AspectCtx]]
+            ArrayCreationExpr[[AspectCtx]]           => ArrayCreationExpr[[Ctx0,AspectCtx]]
+            ClassMemberDec[[AspectCtx]]              => ClassMemberDec[[Ctx0,AspectCtx]]
+            ClassBodyDec[[AspectCtx]]                => ClassBodyDec[[Ctx0,AspectCtx]]
+            Interfaces[[AspectCtx]]                  => Interfaces[[Ctx0,AspectCtx]]
+            Super[[AspectCtx]]                       => Super[[Ctx0,AspectCtx]]
+            ClassMod[[AspectCtx]]                    => ClassMod[[Ctx0,AspectCtx]]
+            ClassDecHead[[AspectCtx]]                => ClassDecHead[[Ctx0,AspectCtx]]
+            ClassBody[[AspectCtx]]                   => ClassBody[[Ctx0,AspectCtx]]
+            ClassDec[[AspectCtx]]                    => ClassDec[[Ctx0,AspectCtx]]
+            InterfaceMod[[AspectCtx]]                => InterfaceMod[[Ctx0,AspectCtx]]
+            InterfaceMemberDec[[AspectCtx]]          => InterfaceMemberDec[[Ctx0,AspectCtx]]
+            ExtendsInterfaces[[AspectCtx]]           => ExtendsInterfaces[[Ctx0,AspectCtx]]
+            InterfaceDecHead[[AspectCtx]]            => InterfaceDecHead[[Ctx0,AspectCtx]]
+            InterfaceDec[[AspectCtx]]                => InterfaceDec[[Ctx0,AspectCtx]]
+            DefaultVal[[AspectCtx]]                  => DefaultVal[[Ctx0,AspectCtx]]
+            AnnoElemDec[[AspectCtx]]                 => AnnoElemDec[[Ctx0,AspectCtx]]
+            AnnoDecHead[[AspectCtx]]                 => AnnoDecHead[[Ctx0,AspectCtx]]
+            AnnoDec[[AspectCtx]]                     => AnnoDec[[Ctx0,AspectCtx]]
+            AbstractMethodMod[[AspectCtx]]           => AbstractMethodMod[[Ctx0,AspectCtx]]
+            AbstractMethodDec[[AspectCtx]]           => AbstractMethodDec[[Ctx0,AspectCtx]]
+            ConstantMod[[AspectCtx]]                 => ConstantMod[[Ctx0,AspectCtx]]
+            ConstantDec[[AspectCtx]]                 => ConstantDec[[Ctx0,AspectCtx]]
+            EnumBodyDecs[[AspectCtx]]                => EnumBodyDecs[[Ctx0,AspectCtx]]
+            EnumConstArgs[[AspectCtx]]               => EnumConstArgs[[Ctx0,AspectCtx]]
+            EnumConst[[AspectCtx]]                   => EnumConst[[Ctx0,AspectCtx]]
+            EnumBody[[AspectCtx]]                    => EnumBody[[Ctx0,AspectCtx]]
+            EnumDecHead[[AspectCtx]]                 => EnumDecHead[[Ctx0,AspectCtx]]
+            EnumDec[[AspectCtx]]                     => EnumDec[[Ctx0,AspectCtx]]
+            ConstrMod[[AspectCtx]]                   => ConstrMod[[Ctx0,AspectCtx]]
+            ConstrInv[[AspectCtx]]                   => ConstrInv[[Ctx0,AspectCtx]]
+            ConstrBody[[AspectCtx]]                  => ConstrBody[[Ctx0,AspectCtx]]
+            ConstrHead[[AspectCtx]]                  => ConstrHead[[Ctx0,AspectCtx]]
+            ConstrDec[[AspectCtx]]                   => ConstrDec[[Ctx0,AspectCtx]]
+            StaticInit[[AspectCtx]]                  => StaticInit[[Ctx0,AspectCtx]]
+            InstanceInit[[AspectCtx]]                => InstanceInit[[Ctx0,AspectCtx]]
+            MethodBody[[AspectCtx]]                  => MethodBody[[Ctx0,AspectCtx]]
+            ExceptionType[[AspectCtx]]               => ExceptionType[[Ctx0,AspectCtx]]
+            Throws[[AspectCtx]]                      => Throws[[Ctx0,AspectCtx]]
+            MethodMod[[AspectCtx]]                   => MethodMod[[Ctx0,AspectCtx]]
+            VarMod[[AspectCtx]]                      => VarMod[[Ctx0,AspectCtx]]
+            FormalParam[[AspectCtx]]                 => FormalParam[[Ctx0,AspectCtx]]
+            ResultType[[AspectCtx]]                  => ResultType[[Ctx0,AspectCtx]]
+            MethodDecHead[[AspectCtx]]               => MethodDecHead[[Ctx0,AspectCtx]]
+            MethodDec[[AspectCtx]]                   => MethodDec[[Ctx0,AspectCtx]]
+            BlockStm[[AspectCtx]]                    => BlockStm[[Ctx0,AspectCtx]]
+            Block[[AspectCtx]]                       => Block[[Ctx0,AspectCtx]]
+            CatchClause[[AspectCtx]]                 => CatchClause[[Ctx0,AspectCtx]]
+            SwitchLabel[[AspectCtx]]                 => SwitchLabel[[Ctx0,AspectCtx]]
+            SwitchGroup[[AspectCtx]]                 => SwitchGroup[[Ctx0,AspectCtx]]
+            SwitchBlock[[AspectCtx]]                 => SwitchBlock[[Ctx0,AspectCtx]]
+            Stm[[AspectCtx]]                         => Stm[[Ctx0,AspectCtx]]
+            LocalVarDec[[AspectCtx]]                 => LocalVarDec[[Ctx0,AspectCtx]]
+            LocalVarDecStm[[AspectCtx]]              => LocalVarDecStm[[Ctx0,AspectCtx]]
+            FieldMod[[AspectCtx]]                    => FieldMod[[Ctx0,AspectCtx]]
+            VarInit[[AspectCtx]]                     => VarInit[[Ctx0,AspectCtx]]
+            Dim[[AspectCtx]]                         => Dim[[Ctx0,AspectCtx]]
+            VarDecId[[AspectCtx]]                    => VarDecId[[Ctx0,AspectCtx]]
+            VarDec[[AspectCtx]]                      => VarDec[[Ctx0,AspectCtx]]
+            FieldDec[[AspectCtx]]                    => FieldDec[[Ctx0,AspectCtx]]
+            ArrayInit[[AspectCtx]]                   => ArrayInit[[Ctx0,AspectCtx]]
+            ClassLiteral[[AspectCtx]]                => ClassLiteral[[Ctx0,AspectCtx]]
+            Literal[[AspectCtx]]                     => Literal[[Ctx0,AspectCtx]]
+            Type[[AspectCtx]]                        => Type[[Ctx0,AspectCtx]]
+            ArrayType[[AspectCtx]]                   => ArrayType[[Ctx0,AspectCtx]]
+            TypeVar[[AspectCtx]]                     => TypeVar[[Ctx0,AspectCtx]]
+            TypeDecSpec[[AspectCtx]]                 => TypeDecSpec[[Ctx0,AspectCtx]]
+            InterfaceType[[AspectCtx]]               => InterfaceType[[Ctx0,AspectCtx]]
+            ClassType[[AspectCtx]]                   => ClassType[[Ctx0,AspectCtx]]
+            ClassOrInterfaceType[[AspectCtx]]        => ClassOrInterfaceType[[Ctx0,AspectCtx]]
+            RefType[[AspectCtx]]                     => RefType[[Ctx0,AspectCtx]]
+            TypeVarId[[AspectCtx]]                   => TypeVarId[[Ctx0,AspectCtx]]
+            TypeParams[[AspectCtx]]                  => TypeParams[[Ctx0,AspectCtx]]
+            TypeBound[[AspectCtx]]                   => TypeBound[[Ctx0,AspectCtx]]
+            TypeParam[[AspectCtx]]                   => TypeParam[[Ctx0,AspectCtx]]
+            WildcardBound[[AspectCtx]]               => WildcardBound[[Ctx0,AspectCtx]]
+            ActualTypeArg[[AspectCtx]]               => ActualTypeArg[[Ctx0,AspectCtx]]
+            TypeArgs[[AspectCtx]]                    => TypeArgs[[Ctx0,AspectCtx]]
+            PackageOrTypeName[[AspectCtx]]           => PackageOrTypeName[[Ctx0,AspectCtx]]
+            MethodName[[AspectCtx]]                  => MethodName[[Ctx0,AspectCtx]]
+            ExprName[[AspectCtx]]                    => ExprName[[Ctx0,AspectCtx]]
+            TypeName[[AspectCtx]]                    => TypeName[[Ctx0,AspectCtx]]
+            AmbName[[AspectCtx]]                     => AmbName[[Ctx0,AspectCtx]]
+            PackageName[[AspectCtx]]                 => PackageName[[Ctx0,AspectCtx]]
+            FloatType[[AspectCtx]]                   => FloatType[[Ctx0,AspectCtx]]
+            IntType[[AspectCtx]]                     => IntType[[Ctx0,AspectCtx]]
+            NumType[[AspectCtx]]                     => NumType[[Ctx0,AspectCtx]]
+            PrimType[[AspectCtx]]                    => PrimType[[Ctx0,AspectCtx]]
+            NullLiteral[[AspectCtx]]                 => NullLiteral[[Ctx0,AspectCtx]]
+            FooStringChars[[AspectCtx]]              => FooStringChars[[Ctx0,AspectCtx]]
+            StringChars[[AspectCtx]]                 => StringChars[[Ctx0,AspectCtx]]
+            StringPart[[AspectCtx]]                  => StringPart[[Ctx0,AspectCtx]]
+            StringLiteral[[AspectCtx]]               => StringLiteral[[Ctx0,AspectCtx]]
+            SingleChar[[AspectCtx]]                  => SingleChar[[Ctx0,AspectCtx]]
+            CharContent[[AspectCtx]]                 => CharContent[[Ctx0,AspectCtx]]
+            CharLiteral[[AspectCtx]]                 => CharLiteral[[Ctx0,AspectCtx]]
+            LastOcta[[AspectCtx]]                    => LastOcta[[Ctx0,AspectCtx]]
+            OctaEscape[[AspectCtx]]                  => OctaEscape[[Ctx0,AspectCtx]]
+            NamedEscape[[AspectCtx]]                 => NamedEscape[[Ctx0,AspectCtx]]
+            EscapeSeq[[AspectCtx]]                   => EscapeSeq[[Ctx0,AspectCtx]]
+            Bool[[AspectCtx]]                        => Bool[[Ctx0,AspectCtx]]
+            BoolLiteral[[AspectCtx]]                 => BoolLiteral[[Ctx0,AspectCtx]]
+            BinaryExponent[[AspectCtx]]              => BinaryExponent[[Ctx0,AspectCtx]]
+            HexaSignificand[[AspectCtx]]             => HexaSignificand[[Ctx0,AspectCtx]]
+            HexaFloatNumeral[[AspectCtx]]            => HexaFloatNumeral[[Ctx0,AspectCtx]]
+            SignedInteger[[AspectCtx]]               => SignedInteger[[Ctx0,AspectCtx]]
+            DeciFloatExponentPart[[AspectCtx]]       => DeciFloatExponentPart[[Ctx0,AspectCtx]]
+            DeciFloatDigits[[AspectCtx]]             => DeciFloatDigits[[Ctx0,AspectCtx]]
+            DeciFloatNumeral[[AspectCtx]]            => DeciFloatNumeral[[Ctx0,AspectCtx]]
+            FloatLiteral[[AspectCtx]]                => FloatLiteral[[Ctx0,AspectCtx]]
+            HexaFloatLiteral[[AspectCtx]]            => HexaFloatLiteral[[Ctx0,AspectCtx]]
+            DeciFloatLiteral[[AspectCtx]]            => DeciFloatLiteral[[Ctx0,AspectCtx]]
+            IntLiteral[[AspectCtx]]                  => IntLiteral[[Ctx0,AspectCtx]]
+            OctaNumeral[[AspectCtx]]                 => OctaNumeral[[Ctx0,AspectCtx]]
+            HexaNumeral[[AspectCtx]]                 => HexaNumeral[[Ctx0,AspectCtx]]
+            DeciNumeral[[AspectCtx]]                 => DeciNumeral[[Ctx0,AspectCtx]]
+            OctaLiteral[[AspectCtx]]                 => OctaLiteral[[Ctx0,AspectCtx]]
+            HexaLiteral[[AspectCtx]]                 => HexaLiteral[[Ctx0,AspectCtx]]
+            DeciLiteral[[AspectCtx]]                 => DeciLiteral[[Ctx0,AspectCtx]]
+            Modifier[[AspectCtx]]                    => Modifier[[Ctx0,AspectCtx]]
+            StrictFP[[AspectCtx]]                    => StrictFP[[Ctx0,AspectCtx]]
+            Synchronized[[AspectCtx]]                => Synchronized[[Ctx0,AspectCtx]]
+            Volatile[[AspectCtx]]                    => Volatile[[Ctx0,AspectCtx]]
+            Transient[[AspectCtx]]                   => Transient[[Ctx0,AspectCtx]]
+            Native[[AspectCtx]]                      => Native[[Ctx0,AspectCtx]]
+            Static[[AspectCtx]]                      => Static[[Ctx0,AspectCtx]]
+            Final[[AspectCtx]]                       => Final[[Ctx0,AspectCtx]]
+            Abstract[[AspectCtx]]                    => Abstract[[Ctx0,AspectCtx]]
+            Protected[[AspectCtx]]                   => Protected[[Ctx0,AspectCtx]]
+            Private[[AspectCtx]]                     => Private[[Ctx0,AspectCtx]]
+            Public[[AspectCtx]]                      => Public[[Ctx0,AspectCtx]]
+            Id[[AspectCtx]]                          => Id[[Ctx0,AspectCtx]]
+            ID[[AspectCtx]]                          => ID[[Ctx0,AspectCtx]]
+            Keyword[[AspectCtx]]                     => Keyword[[Ctx0,AspectCtx]]
+            CompilationUnit[[JavaCtx]]               => CompilationUnit[[Ctx0,JavaCtx]]
+            TypeDec[[JavaCtx]]                       => TypeDec[[Ctx0,JavaCtx]]
+            ImportDec[[JavaCtx]]                     => ImportDec[[Ctx0,JavaCtx]]
+            PackageDec[[JavaCtx]]                    => PackageDec[[Ctx0,JavaCtx]]
+            ElemVal[[JavaCtx]]                       => ElemVal[[Ctx0,JavaCtx]]
+            ElemValPair[[JavaCtx]]                   => ElemValPair[[Ctx0,JavaCtx]]
+            Anno[[JavaCtx]]                          => Anno[[Ctx0,JavaCtx]]
+            LHS[[JavaCtx]]                           => LHS[[Ctx0,JavaCtx]]
+            CondMid[[JavaCtx]]                       => CondMid[[Ctx0,JavaCtx]]
+            ArraySubscript[[JavaCtx]]                => ArraySubscript[[Ctx0,JavaCtx]]
+            DimExpr[[JavaCtx]]                       => DimExpr[[Ctx0,JavaCtx]]
+            ArrayBaseType[[JavaCtx]]                 => ArrayBaseType[[Ctx0,JavaCtx]]
+            ArrayCreationExpr[[JavaCtx]]             => ArrayCreationExpr[[Ctx0,JavaCtx]]
+            ClassMemberDec[[JavaCtx]]                => ClassMemberDec[[Ctx0,JavaCtx]]
+            ClassBodyDec[[JavaCtx]]                  => ClassBodyDec[[Ctx0,JavaCtx]]
+            Interfaces[[JavaCtx]]                    => Interfaces[[Ctx0,JavaCtx]]
+            Super[[JavaCtx]]                         => Super[[Ctx0,JavaCtx]]
+            ClassMod[[JavaCtx]]                      => ClassMod[[Ctx0,JavaCtx]]
+            ClassDecHead[[JavaCtx]]                  => ClassDecHead[[Ctx0,JavaCtx]]
+            ClassBody[[JavaCtx]]                     => ClassBody[[Ctx0,JavaCtx]]
+            ClassDec[[JavaCtx]]                      => ClassDec[[Ctx0,JavaCtx]]
+            InterfaceMod[[JavaCtx]]                  => InterfaceMod[[Ctx0,JavaCtx]]
+            InterfaceMemberDec[[JavaCtx]]            => InterfaceMemberDec[[Ctx0,JavaCtx]]
+            ExtendsInterfaces[[JavaCtx]]             => ExtendsInterfaces[[Ctx0,JavaCtx]]
+            InterfaceDecHead[[JavaCtx]]              => InterfaceDecHead[[Ctx0,JavaCtx]]
+            InterfaceDec[[JavaCtx]]                  => InterfaceDec[[Ctx0,JavaCtx]]
+            DefaultVal[[JavaCtx]]                    => DefaultVal[[Ctx0,JavaCtx]]
+            AnnoElemDec[[JavaCtx]]                   => AnnoElemDec[[Ctx0,JavaCtx]]
+            AnnoDecHead[[JavaCtx]]                   => AnnoDecHead[[Ctx0,JavaCtx]]
+            AnnoDec[[JavaCtx]]                       => AnnoDec[[Ctx0,JavaCtx]]
+            AbstractMethodMod[[JavaCtx]]             => AbstractMethodMod[[Ctx0,JavaCtx]]
+            AbstractMethodDec[[JavaCtx]]             => AbstractMethodDec[[Ctx0,JavaCtx]]
+            ConstantMod[[JavaCtx]]                   => ConstantMod[[Ctx0,JavaCtx]]
+            ConstantDec[[JavaCtx]]                   => ConstantDec[[Ctx0,JavaCtx]]
+            EnumBodyDecs[[JavaCtx]]                  => EnumBodyDecs[[Ctx0,JavaCtx]]
+            EnumConstArgs[[JavaCtx]]                 => EnumConstArgs[[Ctx0,JavaCtx]]
+            EnumConst[[JavaCtx]]                     => EnumConst[[Ctx0,JavaCtx]]
+            EnumBody[[JavaCtx]]                      => EnumBody[[Ctx0,JavaCtx]]
+            EnumDecHead[[JavaCtx]]                   => EnumDecHead[[Ctx0,JavaCtx]]
+            EnumDec[[JavaCtx]]                       => EnumDec[[Ctx0,JavaCtx]]
+            ConstrMod[[JavaCtx]]                     => ConstrMod[[Ctx0,JavaCtx]]
+            ConstrInv[[JavaCtx]]                     => ConstrInv[[Ctx0,JavaCtx]]
+            ConstrBody[[JavaCtx]]                    => ConstrBody[[Ctx0,JavaCtx]]
+            ConstrHead[[JavaCtx]]                    => ConstrHead[[Ctx0,JavaCtx]]
+            ConstrDec[[JavaCtx]]                     => ConstrDec[[Ctx0,JavaCtx]]
+            StaticInit[[JavaCtx]]                    => StaticInit[[Ctx0,JavaCtx]]
+            InstanceInit[[JavaCtx]]                  => InstanceInit[[Ctx0,JavaCtx]]
+            MethodBody[[JavaCtx]]                    => MethodBody[[Ctx0,JavaCtx]]
+            ExceptionType[[JavaCtx]]                 => ExceptionType[[Ctx0,JavaCtx]]
+            Throws[[JavaCtx]]                        => Throws[[Ctx0,JavaCtx]]
+            MethodMod[[JavaCtx]]                     => MethodMod[[Ctx0,JavaCtx]]
+            VarMod[[JavaCtx]]                        => VarMod[[Ctx0,JavaCtx]]
+            FormalParam[[JavaCtx]]                   => FormalParam[[Ctx0,JavaCtx]]
+            ResultType[[JavaCtx]]                    => ResultType[[Ctx0,JavaCtx]]
+            MethodDecHead[[JavaCtx]]                 => MethodDecHead[[Ctx0,JavaCtx]]
+            MethodDec[[JavaCtx]]                     => MethodDec[[Ctx0,JavaCtx]]
+            BlockStm[[JavaCtx]]                      => BlockStm[[Ctx0,JavaCtx]]
+            Block[[JavaCtx]]                         => Block[[Ctx0,JavaCtx]]
+            CatchClause[[JavaCtx]]                   => CatchClause[[Ctx0,JavaCtx]]
+            SwitchLabel[[JavaCtx]]                   => SwitchLabel[[Ctx0,JavaCtx]]
+            SwitchGroup[[JavaCtx]]                   => SwitchGroup[[Ctx0,JavaCtx]]
+            SwitchBlock[[JavaCtx]]                   => SwitchBlock[[Ctx0,JavaCtx]]
+            Stm[[JavaCtx]]                           => Stm[[Ctx0,JavaCtx]]
+            LocalVarDec[[JavaCtx]]                   => LocalVarDec[[Ctx0,JavaCtx]]
+            LocalVarDecStm[[JavaCtx]]                => LocalVarDecStm[[Ctx0,JavaCtx]]
+            FieldMod[[JavaCtx]]                      => FieldMod[[Ctx0,JavaCtx]]
+            VarInit[[JavaCtx]]                       => VarInit[[Ctx0,JavaCtx]]
+            Dim[[JavaCtx]]                           => Dim[[Ctx0,JavaCtx]]
+            VarDecId[[JavaCtx]]                      => VarDecId[[Ctx0,JavaCtx]]
+            VarDec[[JavaCtx]]                        => VarDec[[Ctx0,JavaCtx]]
+            FieldDec[[JavaCtx]]                      => FieldDec[[Ctx0,JavaCtx]]
+            ArrayInit[[JavaCtx]]                     => ArrayInit[[Ctx0,JavaCtx]]
+            ClassLiteral[[JavaCtx]]                  => ClassLiteral[[Ctx0,JavaCtx]]
+            Literal[[JavaCtx]]                       => Literal[[Ctx0,JavaCtx]]
+            Type[[JavaCtx]]                          => Type[[Ctx0,JavaCtx]]
+            ArrayType[[JavaCtx]]                     => ArrayType[[Ctx0,JavaCtx]]
+            TypeVar[[JavaCtx]]                       => TypeVar[[Ctx0,JavaCtx]]
+            TypeDecSpec[[JavaCtx]]                   => TypeDecSpec[[Ctx0,JavaCtx]]
+            InterfaceType[[JavaCtx]]                 => InterfaceType[[Ctx0,JavaCtx]]
+            ClassType[[JavaCtx]]                     => ClassType[[Ctx0,JavaCtx]]
+            ClassOrInterfaceType[[JavaCtx]]          => ClassOrInterfaceType[[Ctx0,JavaCtx]]
+            RefType[[JavaCtx]]                       => RefType[[Ctx0,JavaCtx]]
+            TypeVarId[[JavaCtx]]                     => TypeVarId[[Ctx0,JavaCtx]]
+            TypeParams[[JavaCtx]]                    => TypeParams[[Ctx0,JavaCtx]]
+            TypeBound[[JavaCtx]]                     => TypeBound[[Ctx0,JavaCtx]]
+            TypeParam[[JavaCtx]]                     => TypeParam[[Ctx0,JavaCtx]]
+            WildcardBound[[JavaCtx]]                 => WildcardBound[[Ctx0,JavaCtx]]
+            ActualTypeArg[[JavaCtx]]                 => ActualTypeArg[[Ctx0,JavaCtx]]
+            TypeArgs[[JavaCtx]]                      => TypeArgs[[Ctx0,JavaCtx]]
+            PackageOrTypeName[[JavaCtx]]             => PackageOrTypeName[[Ctx0,JavaCtx]]
+            MethodName[[JavaCtx]]                    => MethodName[[Ctx0,JavaCtx]]
+            ExprName[[JavaCtx]]                      => ExprName[[Ctx0,JavaCtx]]
+            TypeName[[JavaCtx]]                      => TypeName[[Ctx0,JavaCtx]]
+            AmbName[[JavaCtx]]                       => AmbName[[Ctx0,JavaCtx]]
+            PackageName[[JavaCtx]]                   => PackageName[[Ctx0,JavaCtx]]
+            FloatType[[JavaCtx]]                     => FloatType[[Ctx0,JavaCtx]]
+            IntType[[JavaCtx]]                       => IntType[[Ctx0,JavaCtx]]
+            NumType[[JavaCtx]]                       => NumType[[Ctx0,JavaCtx]]
+            PrimType[[JavaCtx]]                      => PrimType[[Ctx0,JavaCtx]]
+            NullLiteral[[JavaCtx]]                   => NullLiteral[[Ctx0,JavaCtx]]
+            FooStringChars[[JavaCtx]]                => FooStringChars[[Ctx0,JavaCtx]]
+            StringChars[[JavaCtx]]                   => StringChars[[Ctx0,JavaCtx]]
+            StringPart[[JavaCtx]]                    => StringPart[[Ctx0,JavaCtx]]
+            StringLiteral[[JavaCtx]]                 => StringLiteral[[Ctx0,JavaCtx]]
+            SingleChar[[JavaCtx]]                    => SingleChar[[Ctx0,JavaCtx]]
+            CharContent[[JavaCtx]]                   => CharContent[[Ctx0,JavaCtx]]
+            CharLiteral[[JavaCtx]]                   => CharLiteral[[Ctx0,JavaCtx]]
+            LastOcta[[JavaCtx]]                      => LastOcta[[Ctx0,JavaCtx]]
+            OctaEscape[[JavaCtx]]                    => OctaEscape[[Ctx0,JavaCtx]]
+            NamedEscape[[JavaCtx]]                   => NamedEscape[[Ctx0,JavaCtx]]
+            EscapeSeq[[JavaCtx]]                     => EscapeSeq[[Ctx0,JavaCtx]]
+            Bool[[JavaCtx]]                          => Bool[[Ctx0,JavaCtx]]
+            BoolLiteral[[JavaCtx]]                   => BoolLiteral[[Ctx0,JavaCtx]]
+            BinaryExponent[[JavaCtx]]                => BinaryExponent[[Ctx0,JavaCtx]]
+            HexaSignificand[[JavaCtx]]               => HexaSignificand[[Ctx0,JavaCtx]]
+            HexaFloatNumeral[[JavaCtx]]              => HexaFloatNumeral[[Ctx0,JavaCtx]]
+            SignedInteger[[JavaCtx]]                 => SignedInteger[[Ctx0,JavaCtx]]
+            DeciFloatExponentPart[[JavaCtx]]         => DeciFloatExponentPart[[Ctx0,JavaCtx]]
+            DeciFloatDigits[[JavaCtx]]               => DeciFloatDigits[[Ctx0,JavaCtx]]
+            DeciFloatNumeral[[JavaCtx]]              => DeciFloatNumeral[[Ctx0,JavaCtx]]
+            FloatLiteral[[JavaCtx]]                  => FloatLiteral[[Ctx0,JavaCtx]]
+            HexaFloatLiteral[[JavaCtx]]              => HexaFloatLiteral[[Ctx0,JavaCtx]]
+            DeciFloatLiteral[[JavaCtx]]              => DeciFloatLiteral[[Ctx0,JavaCtx]]
+            IntLiteral[[JavaCtx]]                    => IntLiteral[[Ctx0,JavaCtx]]
+            OctaNumeral[[JavaCtx]]                   => OctaNumeral[[Ctx0,JavaCtx]]
+            HexaNumeral[[JavaCtx]]                   => HexaNumeral[[Ctx0,JavaCtx]]
+            DeciNumeral[[JavaCtx]]                   => DeciNumeral[[Ctx0,JavaCtx]]
+            OctaLiteral[[JavaCtx]]                   => OctaLiteral[[Ctx0,JavaCtx]]
+            HexaLiteral[[JavaCtx]]                   => HexaLiteral[[Ctx0,JavaCtx]]
+            DeciLiteral[[JavaCtx]]                   => DeciLiteral[[Ctx0,JavaCtx]]
+            Modifier[[JavaCtx]]                      => Modifier[[Ctx0,JavaCtx]]
+            StrictFP[[JavaCtx]]                      => StrictFP[[Ctx0,JavaCtx]]
+            Synchronized[[JavaCtx]]                  => Synchronized[[Ctx0,JavaCtx]]
+            Volatile[[JavaCtx]]                      => Volatile[[Ctx0,JavaCtx]]
+            Transient[[JavaCtx]]                     => Transient[[Ctx0,JavaCtx]]
+            Native[[JavaCtx]]                        => Native[[Ctx0,JavaCtx]]
+            Static[[JavaCtx]]                        => Static[[Ctx0,JavaCtx]]
+            Final[[JavaCtx]]                         => Final[[Ctx0,JavaCtx]]
+            Abstract[[JavaCtx]]                      => Abstract[[Ctx0,JavaCtx]]
+            Protected[[JavaCtx]]                     => Protected[[Ctx0,JavaCtx]]
+            Private[[JavaCtx]]                       => Private[[Ctx0,JavaCtx]]
+            Public[[JavaCtx]]                        => Public[[Ctx0,JavaCtx]]
+            Id[[JavaCtx]]                            => Id[[Ctx0,JavaCtx]]
+            ID[[JavaCtx]]                            => ID[[Ctx0,JavaCtx]]
+            Keyword[[JavaCtx]]                       => Keyword[[Ctx0,JavaCtx]]
+            ArrayAccess[[JavaCtx]]                   => ArrayAccess[[Ctx0,JavaCtx]]
+            FieldAccess[[JavaCtx]]                   => FieldAccess[[Ctx0,JavaCtx]]
+            MethodSpec[[JavaCtx]]                    => MethodSpec[[Ctx0,JavaCtx]]
+            ArrayAccess[[AspectCtx]]                 => ArrayAccess[[Ctx0,AspectCtx]]
+            FieldAccess[[AspectCtx]]                 => FieldAccess[[Ctx0,AspectCtx]]
+            MethodSpec[[AspectCtx]]                  => MethodSpec[[Ctx0,AspectCtx]]
+            ArrayAccess[[PointcutCtx]]               => ArrayAccess[[Ctx0,PointcutCtx]]
+            FieldAccess[[PointcutCtx]]               => FieldAccess[[Ctx0,PointcutCtx]]
+            MethodSpec[[PointcutCtx]]                => MethodSpec[[Ctx0,PointcutCtx]]
+            ArrayAccess[[PatternCtx]]                => ArrayAccess[[Ctx0,PatternCtx]]
+            FieldAccess[[PatternCtx]]                => FieldAccess[[Ctx0,PatternCtx]]
+            MethodSpec[[PatternCtx]]                 => MethodSpec[[Ctx0,PatternCtx]]
+            ArrayAccess[[PlainJavaTheCtx]]           => ArrayAccess[[Ctx0,PlainJavaTheCtx]]
+            FieldAccess[[PlainJavaTheCtx]]           => FieldAccess[[Ctx0,PlainJavaTheCtx]]
+            MethodSpec[[PlainJavaTheCtx]]            => MethodSpec[[Ctx0,PlainJavaTheCtx]]
+            Expr[[JavaCtx]]                          => Expr[[Ctx0,JavaCtx]]
+            Expr[[AspectCtx]]                        => Expr[[Ctx0,AspectCtx]]
+            Expr[[PointcutCtx]]                      => Expr[[Ctx0,PointcutCtx]]
+            Expr[[PatternCtx]]                       => Expr[[Ctx0,PatternCtx]]
+            ClassNamePattern                         => ClassNamePattern[[Ctx0]]
+            TypePattern                              => TypePattern[[Ctx0]]
+            Expr[[PlainJavaTheCtx]]                  => Expr[[Ctx0,PlainJavaTheCtx]]
+            PointcutExpr                             => PointcutExpr[[Ctx0]] ]

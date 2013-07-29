@@ -1,0 +1,42 @@
+module eventcj/patternbox
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	libaspectj-front
+	include/EventCJ
+	lib/editor-common.generated
+	
+rules
+	
+  pat2box:
+  	MethodPattern(anno,mod,retType,member,param,throw) -> box |[ H hs=1 [~anno ~mod ~retType H hs=0 [~*member' KW["("] ~param KW[")"] ] ~throw] ]|
+  where
+  	<pat2box> member => member'  		
+  
+  pat2box:
+  	ConstrPattern(anno,mod,constrpat,param,throw) -> box |[H hs=1 [~anno ~mod H hs=0 [~*constrpat' KW["("] ~param KW[")"] ~throw]]]|
+  	where
+  		<pat2box>constrpat => constrpat'
+  
+  pat2box:
+  	MemberName(idpat) -> box |[ H hs=0 [~idpat]]|
+
+  pat2box:
+  	MemberName(typat , idpat) -> box |[ H hs=0 [~typat"."~idpat] ]|
+  
+  pat2box:
+  	WildcardMemberName(typat , idpat) -> box |[ H hs=0 [~typat".."~idpat]]|
+  
+  pat2box:
+  	ConstrName() -> box |["new"]|
+  
+  pat2box:
+  	ConstrName(typat) -> box |[ H hs=0 [~typat".new" ]]|
+  
+  pat2box:
+  	WildcardConstrName(typat) -> box |[ H hs=0 [~typat"..new"]]|
+  
+  pat2box:
+  	t -> <ast2abox(|[<import-term(include/EventCJ.generated.pp.af)>,<import-term(include/EventCJ.pp.af)>])> t

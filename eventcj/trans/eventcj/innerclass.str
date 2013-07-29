@@ -1,0 +1,89 @@
+module eventcj/innerclass
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	include/EventCJ
+	lib/editor-common.generated
+	eventcj/vars
+	eventcj/layer-manager
+	
+rules
+  genStaticXFix:
+  	[] -> $[]
+  
+  genStaticXFix:
+  	_ -> $[Static] 
+  	
+  layer-to-inner(|cname, meth*):
+  	Layer(Id(name), d*) -> 
+  	$[class [name] extends LayerFor[cname]{
+  		public String getName(){return "[name]";}
+  		[d'*]
+  	}]
+		where
+			d'* := <map(methods-to-inner(|cname,name))> d*
+
+  genEmptyMethod:
+  	d@MethodDec(h@MethodDecHead(annon,_,_,_,_,_), _) -> <genEmptyMethod'>(<filter(?Static())>annon,<filter(?Abstract())>annon,d) 
+  			
+  genEmptyMethod':
+  	([],[],MethodDec(h@MethodDecHead(annon,tparam,retT,Id(name),param,thrw), _)) -> 
+  	[MethodDec(h,body),
+  	MethodDec(MethodDecHead(annon,tparam,retT,Id($[[name]After]),param,thrw),body),
+  	MethodDec(MethodDecHead(annon,tparam,retT,Id($[[name]Before]),param,thrw),body)]
+  	where
+  		body := <genReturnStatementFor>retT
+  
+  genEmptyMethod':
+  	(_,_,_) -> []
+  	
+  // for void methods => always empty
+  genReturnStatementFor:
+  	Void() -> Block([])
+  
+  // for boolean methods => always returns false
+  genReturnStatementFor:
+  	Boolean() -> Block([Return(Some(Lit(Bool(False()))))])
+  
+  // for reference type methods => always ruterns null
+  genReturnStatementFor:
+  	ClassOrInterfaceType(_,_) -> Block([Return(Some(Lit(Null())))])
+  
+  // and for other numerical methods => always returns 0
+  genReturnStatementFor:
+  	_ -> Block([Return(Some(Lit(Deci("0"))))])
+  	
+  convertThis(|cname):
+  	This() -> <genThis(|cname)>()
+  
+  methods-to-inner(|cname,lname):
+  	Activation(b) -> $[public void activate()[b']]
+  	where
+  		b' := <pp-java-string>b
+  
+  methods-to-inner(|cname,lname):
+  	Deactivation(b) -> $[
+  		public void deactivate()[b']
+  	]
+  	where
+  		b' := <pp-java-string>b
+  
+  genThis(|cname):
+  	() -> Id($[[cname].this])
+  
+  method-header-to-inner(|cname, lname):
+  	PartialMethodHead(_, knd, resT, Id(mname), param*, thrw)-> MethodDecHead([], None(), resT, Id($[[mname][<to-name>knd]]),param*,thrw)
+  
+  methods-to-inner(|cname, lname):
+  	PartialMethodDec(h,b) -> <pp-java-string>MethodDec(<method-header-to-inner(|cname, lname)>h, b)
+  
+  to-name:
+  	AfterTiming() -> $[After]
+  
+  to-name:
+  	BeforeTiming() -> $[Before]
+  //added by wander
+  //to-name:
+  	//AroundTiming() ->$[Around]

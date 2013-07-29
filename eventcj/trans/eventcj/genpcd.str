@@ -1,0 +1,73 @@
+module eventcj/genpcd
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	libaspectj-front
+	include/EventCJ
+	lib/editor-common.generated
+	eventcj/pattern
+	
+rules
+  genPointcut:
+  	(name,(param*,sndr,(befores*,afters*))) ->
+  	$[[sel1']
+  	[sel2']]
+  	where
+  		sel1' := <genPcd(|name,"B",param*)>befores*;
+  		sel2' := <genPcd(|name,"A",param*)>afters*
+  
+  genPcd(|name,k,param*):
+  	[] -> $[]
+  
+  genPcd(|name,k,param*):
+  	sel* -> $[pointcut [name]_[k]([param'*]): [pcd];]
+  	where
+  		param'* := <pp-java-string><list-to-args>param*;
+  		pcd := <disjunct2pcd>sel*
+  
+  
+  disjunct2pcd:
+  	[x|xs] -> <foldr(<conjunct2pcd>x,orpcd)><map(conjunct2pcd)>xs
+  	
+  disjunct2pcd:
+  	[] -> $[]
+  
+  
+  orpcd:
+  	(a,b) -> $[[a] || [b]]
+  
+  conjunct2pcd:
+  	[x|xs] -> <foldr(<selector2pcd>x,andpcd)><map(selector2pcd)>xs
+  
+  conjunct2pcd:
+  	[] -> $[]
+  
+  andpcd:
+  	(a,b) -> $[[a] && [b]]
+  
+  selector2pcd:
+  	ActionSelector(_,s) -> $[[s']]
+  	where
+  		s' := <selector2pcd>s
+  
+  selector2pcd:
+  	Exec(p) -> $[execution([p'])]
+  	where
+  		p' := <pat2string>p
+  
+  selector2pcd:
+  	Call(p) -> $[call([p'])]
+  	where
+  		p' := <pat2string>p
+  
+  selector2pcd:
+  	ThisSelector(p) -> $[this([p'])]
+  	where
+  		p' := <pat2string>p
+  
+  selector2pcd:
+  	TargetSelector(p) -> $[target([p'])]
+  	where
+  		p' := <pat2string>p

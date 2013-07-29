@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="ecj" description="EventCJ" language="EventCJ" derivedFrom="DynamicRoot" validator="eventcj.EventCJValidator" validatorClass="eventcj.EventCJValidator"></language>
+       </extension>
+       <extension id="eventcj.parser" name="EventCJ Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="eventcj.EventCJParseController" language="EventCJ">
+          </parser>
+       </extension>    
+    </plugin>

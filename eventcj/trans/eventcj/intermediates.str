@@ -1,0 +1,6 @@
+module eventcj/intermediates
+imports
+	include/EventCJ
+signature
+constructors
+	ValidProceed : MethodSpec

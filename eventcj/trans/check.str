@@ -1,0 +1,29 @@
+module check
+
+imports
+  libstratego-lib
+  include/EventCJ
+  eventcj/intermediates
+  lib/editor-common.generated
+  analyze
+
+rules
+    
+  // Reports an error if a property type is undefined.
+  // This error is reported on the type name 'type'.
+  constraint-error:
+  	t@Proceed() -> (t, $[proceed can be used only within layers])
+  
+  // Reports an error if an entity is defined more than once.
+  // This constraint is implemented by testing if the "bag" of
+  // all entities x is not a singleton list.
+  // constraint-error:
+  
+  constraint-warning:
+    Entity(x, _) -> (x, $[Entity names must start with a capital])
+    where
+      not(<explode-string; Hd; is-upper> x)
+  
+  constraint-note:
+    Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
+                                      (this note is defined in trans/check.str) ])

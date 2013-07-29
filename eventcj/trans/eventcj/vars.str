@@ -1,0 +1,18 @@
+module eventcj/vars
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	include/EventCJ
+	lib/editor-common.generated
+	
+rules
+  extract-formal-types:
+  	Param(_,t,_) -> ExprName(Id(<pp-java-string>t))
+  	
+  extract-formal-vars:
+  	Param(_, _, vname)-> ExprName(vname)
+  
+  instance-layer-manager-var:
+  	() -> $[__ecj_lm_]

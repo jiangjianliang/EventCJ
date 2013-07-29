@@ -1,0 +1,16 @@
+module eventcj/layer-manager
+imports
+	libjava-front
+	include/EventCJ
+rules
+  // get-layer-manager:
+  	// () -> $[DefaultLayerManager]
+  	
+  to-layer:
+  	Id(a) -> $["[a]"]
+  
+  to-layer:
+  	AnnonLayer() -> $[*]
+  
+  gen-imports:
+  	() -> $[import eventcj.*;]

@@ -1,0 +1,33 @@
+module eventcj/normalform
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	include/EventCJ
+	lib/editor-common.generated
+
+rules
+  reorganize-selector:
+  	s -> <disjunctive-list><topdown(try(disjunctive-normal-seletctor))>s
+  
+  disjunctive-normal-seletctor:
+  	AndComp(OrComp(sel1,sel2),sel3) -> OrComp(AndComp(sel1,sel3),AndComp(sel2,sel3))
+  	
+  disjunctive-normal-seletctor:
+  	AndComp(sel3,OrComp(sel1,sel2)) -> OrComp(AndComp(sel1,sel3),AndComp(sel2,sel3))
+  
+  disjunctive-list:
+  	OrComp(sel1,sel2) -> <conc>(<disjunctive-list>sel1, <disjunctive-list>sel2)
+  
+  disjunctive-list:
+  	AndComp(sel1,sel2) -> [<conc>(<conjunctive-list>sel1,<conjunctive-list>sel2)]
+  
+  disjunctive-list:
+  	s -> [[s]]
+  
+  conjunctive-list:
+  	AndComp(sel1,sel2) -> <conc>(<conjunctive-list>sel1, <conjunctive-list>sel2)
+  	
+  conjunctive-list:
+  	s -> [s]

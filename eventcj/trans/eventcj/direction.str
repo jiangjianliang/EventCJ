@@ -1,0 +1,164 @@
+module eventcj/direction
+imports
+	libstratego-lib
+	libstratego-gpp
+	libstratego-aterm
+	libjava-front
+	include/EventCJ
+	lib/editor-common.generated
+	eventcj/normalform
+	eventcj/vars
+	eventcj/layer-manager
+	eventcj/genpcd
+
+rules
+  to-java:
+  	Direction(Id(name), b*) ->
+  	$[aspect [name]{
+  		[pcd*]
+  		[adv*]
+  	}]
+  	where
+  		m'* := <map(gen-pcd-map)><filter(?EventDecl(_,_,_,_))> b*;
+  		pcd* := <map(genPointcut)>m'*;
+  		adv* := <map(genTransitionAdvice(|m'*))><filter(?TransitionRuleDecl(_,_,_))>b*
+  		
+  
+  gen-pcd-map:
+  	EventDecl(Id(name), param*, sel, sndr) -> (name,(param*, sndr, (bfr,afr)))
+  	where
+  		sel' := <reorganize-selector>sel;
+  		bfr := <filter(one(?ActionSelector(BeforeTiming(),_)))> sel';
+  		afr := <filter(one(?ActionSelector(AfterTiming(),_)))> sel'
+  	  		
+  genTransitionAdvice(|m):
+  	TransitionRuleDecl(Id(name), params* , trans) ->
+  	$[[beforeAdvice*]
+  	[afterAdvice*]
+  	]
+  	where
+  		pcds := <lookup'>(name,m);
+  		trans' := <gen-transition-code>(trans,<Snd>pcds);
+  		body := $[[<getLayerManager><Snd>pcds];
+  		[trans']];
+  		beforeAdvice* := <genBeforeTransitionAdvice(|name,body)>pcds;
+  		afterAdvice* := <genAfterTransitionAdvice(|name,body)>pcds
+  
+  getLayerManager:
+  	None() -> $[LayerManager lm=LayerManager.getInstance()]
+  
+  getLayerManager:
+  	Some(SendTo(s)) -> $[InstanceLayerManager lm=[<pp-java-string>s].getLayerManager()]
+  		
+  genBeforeTransitionAdvice(|name,body):
+  	(_,_,([],_)) -> $[]
+  
+  genBeforeTransitionAdvice(|name,body):
+  	(param*,_,(_,_)) -> 
+  	$[before([paramString*]): [name]_B[param'*]{
+  		[body];
+  	}]
+  	where
+  		param'* := <pp-java-string><list-to-args><map(extract-formal-vars)>param*;
+  		paramString* := <pp-java-string>param*
+  
+  genAfterTransitionAdvice(|name,body):
+  	(_,_,(_,[])) -> $[]
+  
+  genAfterTransitionAdvice(|name,body):
+  	(param*,_,(_,_)) -> 
+  	$[after([paramString*]): [name]_A[param'*]{
+  		[body];
+  	}]
+  	where
+  		param'* := <pp-java-string><list-to-args><map(extract-formal-vars)>param*;
+  		paramString* := <map(pp-java-string)>param*
+  
+  gen-transition-guard:
+  	AnnonLayer() -> $[]
+  
+  gen-transition-guard:
+  	IfNotActive(t) -> $[if(!lm.isActive([t']))]
+  	where
+  		t' := <to-layer>t
+  
+  gen-transition-guard:
+  	t -> $[if(lm.isActive([t']))]
+  	where
+  		t' := <to-layer>t
+  
+  gen-transition-guard-on(|o):
+  	AnnonLayer() -> $[]
+  
+  gen-transition-guard-on(|o):
+  	IfNotActive(t) -> $[if(!lm.isActive([t']))]
+  	where
+  		t' := <to-layer>t
+  		
+  gen-transition-guard-on(|o):
+  	t -> $[if(lm.isActive([t']))]
+  	where
+  		t' := <to-layer>t
+  	
+  gen-transition-deactivate:
+  	AnnonLayer() -> $[deactivateAll().]
+  	
+  gen-transition-deactivate:
+  	t -> $[deactivate([t']).]
+  	where
+  		t' := <to-layer>t
+  
+  gen-transition-deactivate-on(|o):
+  	AnnonLayer() -> $[deactivateAll().]
+  	
+  gen-transition-deactivate-on(|o):
+  	t -> $[deactivate([t']).]
+  	where
+  		t' := <to-layer>t
+  
+  gen-transition-code:
+  	(ActivateLayer(a,b),None()) ->$[[a']lm.activate([b'])]
+  	where
+  		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  	
+  		
+  gen-transition-code:
+  	(ActivateLayer(a,b),Some(SendTo(s))) ->$[[a']lm.activate([s'].createLayerForName([b']))]
+  	where
+  		s' := <pp-java-string>s;
+ 		a' := <gen-transition-guard-on(|s')>a;
+ 		b' := <to-layer>b
+ 
+  
+  gen-transition-code:
+  	(SwitchLayer(a,b),None()) -> $[[a']lm.[<gen-transition-deactivate>a]activate([b'])]
+  	where
+  		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  		
+  gen-transition-code:
+  	(SwitchLayer(a,NoLayer()),_) -> $[[a']lm.[<gen-transition-deactivate>a]end()]
+  	where
+  		a' := <gen-transition-guard>a
+  
+  gen-transition-code:	
+  	(SwitchLayer(a,b),Some(SendTo(s))) ->$[[a']lm.[<gen-transition-deactivate>a]activate([s'].createLayerForName([b']))]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a;
+  		b' := <to-layer>b
+ 
+  gen-transition-code:
+  	(SwitchLayer(a,NoLayer()),Some(SendTo(s))) ->$[[a']lm.[<gen-transition-deactivate>a]end()]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a
+  
+  gen-transition-code:
+  	(TransitionRuleComposition(r1,r2),sendto) ->
+  	$[[r1'];
+  	else [r2']]
+  	where
+  		r1' := <gen-transition-code>(r1,sendto);
+  		r2' := <gen-transition-code>(r2,sendto)
