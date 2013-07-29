@@ -34,6 +34,14 @@ aspect Help{
 	}
 	class L1 extends LayerForTest{
 		public String getName(){return "L1";}
+		
+		public void restore(){ 
+		                       foo();
+		                     }
+		
+		public void pause(){ 
+		                     bar();
+		                   }
 		void m1After(Object o)
 		{ }
 	}

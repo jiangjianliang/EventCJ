@@ -20,6 +20,9 @@ exports
 	context-free syntax
 		"activate" Block -> ActivationBlock {cons("Activation")}
 		"deactivate" Block -> ActivationBlock {cons("Deactivation")}
+		%%featured by wander
+		"restore" Block -> ActivationBlock {cons("Restore")}
+		"pause" Block -> ActivationBlock {cons("Pause")}
 
 module languages/eventcj/Keywords
 imports
@@ -46,6 +49,9 @@ exports
 		"proceed" -> Keyword
 		"activate" -> Keyword
 		"deactivate" -> Keyword
+		%%featured by wander
+		"restore" -> Keyword
+		"pause" -> Keyword
 	
 	lexical restrictions
 		"after"
@@ -59,6 +65,9 @@ exports
 		"proceed"
 		"activate"
 		"deactivate"
+		%%featured by wander
+		"restore"
+		"pause"
 		-/- [A-Za-z0-9\_\$]
 
 module languages/eventcj/common/BooleanComposition[E]

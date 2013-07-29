@@ -2,8 +2,8 @@
 regular tree grammar
   start DirectorDecl LayerDecl TypeName TypeVar TypeDec Type Stm PackageName Literal InterfaceMemberDec InterfaceDec Id FormalParam Expr CompilationUnit ClassMemberDec ClassBodyDec BlockStm Block AnnoDec Anno
   productions
-    OptTypeArgs1                                      -> <some>(TypeArgs)
-    OptTypeArgs1                                      -> <none>()
+    OptTypeArgs2                                      -> <some>(TypeArgs)
+    OptTypeArgs2                                      -> <none>()
     OptClassBody0                                     -> <some>(ClassBody)
     OptClassBody0                                     -> <none>()
     ListStarOfExpr0                                   -> ListPlusOfExpr0
@@ -13,8 +13,8 @@ regular tree grammar
     ListPlusOfExpr0                                   -> <conc>(ListPlusOfExpr0,ListStarOfExpr0)
     ListPlusOfExpr0                                   -> <conc>(ListPlusOfExpr0,ListPlusOfExpr0)
     ListPlusOfExpr0                                   -> <cons>(Expr,ListStarOfExpr0)
-    OptThrows0                                        -> <some>(Throws)
-    OptThrows0                                        -> <none>()
+    OptThrows1                                        -> <some>(Throws)
+    OptThrows1                                        -> <none>()
     ListStarOfFormalParam0                            -> ListPlusOfFormalParam0
     ListStarOfFormalParam0                            -> <nil>()
     ListStarOfFormalParam0                            -> <conc>(ListStarOfFormalParam0,ListStarOfFormalParam0)
@@ -22,8 +22,8 @@ regular tree grammar
     ListPlusOfFormalParam0                            -> <conc>(ListPlusOfFormalParam0,ListStarOfFormalParam0)
     ListPlusOfFormalParam0                            -> <conc>(ListPlusOfFormalParam0,ListPlusOfFormalParam0)
     ListPlusOfFormalParam0                            -> <cons>(FormalParam,ListStarOfFormalParam0)
-    OptTypeParams0                                    -> <some>(TypeParams)
-    OptTypeParams0                                    -> <none>()
+    OptTypeParams1                                    -> <some>(TypeParams)
+    OptTypeParams1                                    -> <none>()
     ListStarOfLayerMemberDec0                         -> ListPlusOfLayerMemberDec0
     ListStarOfLayerMemberDec0                         -> <nil>()
     ListStarOfLayerMemberDec0                         -> <conc>(ListStarOfLayerMemberDec0,ListStarOfLayerMemberDec0)
@@ -31,8 +31,8 @@ regular tree grammar
     ListPlusOfLayerMemberDec0                         -> <conc>(ListPlusOfLayerMemberDec0,ListStarOfLayerMemberDec0)
     ListPlusOfLayerMemberDec0                         -> <conc>(ListPlusOfLayerMemberDec0,ListPlusOfLayerMemberDec0)
     ListPlusOfLayerMemberDec0                         -> <cons>(LayerMemberDec,ListStarOfLayerMemberDec0)
-    OptSender0                                        -> <some>(Sender)
-    OptSender0                                        -> <none>()
+    OptSender1                                        -> <some>(Sender)
+    OptSender1                                        -> <none>()
     ListStarOfDirectionBody0                          -> ListPlusOfDirectionBody0
     ListStarOfDirectionBody0                          -> <nil>()
     ListStarOfDirectionBody0                          -> <conc>(ListStarOfDirectionBody0,ListStarOfDirectionBody0)
@@ -74,8 +74,8 @@ regular tree grammar
     ListPlusOfMethodMod_NotMethodMod0                 -> <conc>(ListPlusOfMethodMod_NotMethodMod0,ListStarOfMethodMod_NotMethodMod0)
     ListPlusOfMethodMod_NotMethodMod0                 -> <conc>(ListPlusOfMethodMod_NotMethodMod0,ListPlusOfMethodMod_NotMethodMod0)
     ListPlusOfMethodMod_NotMethodMod0                 -> <cons>(MethodMod_NotMethodMod0,ListStarOfMethodMod_NotMethodMod0)
-    OptThrowsPattern0                                 -> <some>(ThrowsPattern)
-    OptThrowsPattern0                                 -> <none>()
+    OptThrowsPattern1                                 -> <some>(ThrowsPattern)
+    OptThrowsPattern1                                 -> <none>()
     ListStarOfFormalPattern0                          -> ListPlusOfFormalPattern0
     ListStarOfFormalPattern0                          -> <nil>()
     ListStarOfFormalPattern0                          -> <conc>(ListStarOfFormalPattern0,ListStarOfFormalPattern0)
@@ -145,7 +145,7 @@ regular tree grammar
     ListPlusOfElemValPair0                            -> <conc>(ListPlusOfElemValPair0,ListStarOfElemValPair0)
     ListPlusOfElemValPair0                            -> <conc>(ListPlusOfElemValPair0,ListPlusOfElemValPair0)
     ListPlusOfElemValPair0                            -> <cons>(ElemValPair,ListStarOfElemValPair0)
-    OptTypeArgs1                                      -> TypeArgs
+    OptTypeArgs2                                      -> TypeArgs
     ListStarOfDim0                                    -> ListPlusOfDim0
     ListStarOfDim0                                    -> <nil>()
     ListStarOfDim0                                    -> <conc>(ListStarOfDim0,ListStarOfDim0)
@@ -167,8 +167,8 @@ regular tree grammar
     ListPlusOfInterfaceType0                          -> <conc>(ListPlusOfInterfaceType0,ListStarOfInterfaceType0)
     ListPlusOfInterfaceType0                          -> <conc>(ListPlusOfInterfaceType0,ListPlusOfInterfaceType0)
     ListPlusOfInterfaceType0                          -> <cons>(InterfaceType,ListStarOfInterfaceType0)
-    OptInterfaces0                                    -> <some>(Interfaces)
-    OptInterfaces0                                    -> <none>()
+    OptInterfaces1                                    -> <some>(Interfaces)
+    OptInterfaces1                                    -> <none>()
     OptSuper0                                         -> <some>(Super)
     OptSuper0                                         -> <none>()
     Anno_ClassMod1                                    -> ClassMod
@@ -187,8 +187,8 @@ regular tree grammar
     ListPlusOfClassBodyDec0                           -> <conc>(ListPlusOfClassBodyDec0,ListStarOfClassBodyDec0)
     ListPlusOfClassBodyDec0                           -> <conc>(ListPlusOfClassBodyDec0,ListPlusOfClassBodyDec0)
     ListPlusOfClassBodyDec0                           -> <cons>(ClassBodyDec,ListStarOfClassBodyDec0)
-    OptExtendsInterfaces0                             -> <some>(ExtendsInterfaces)
-    OptExtendsInterfaces0                             -> <none>()
+    OptExtendsInterfaces1                             -> <some>(ExtendsInterfaces)
+    OptExtendsInterfaces1                             -> <none>()
     Anno_InterfaceMod1                                -> InterfaceMod
     Anno_InterfaceMod1                                -> Anno
     ListStarOfAnno_InterfaceMod0                      -> ListPlusOfAnno_InterfaceMod0
@@ -355,8 +355,8 @@ regular tree grammar
     ListPlusOfClassOrInterfaceType0                   -> <conc>(ListPlusOfClassOrInterfaceType0,ListStarOfClassOrInterfaceType0)
     ListPlusOfClassOrInterfaceType0                   -> <conc>(ListPlusOfClassOrInterfaceType0,ListPlusOfClassOrInterfaceType0)
     ListPlusOfClassOrInterfaceType0                   -> <cons>(ClassOrInterfaceType,ListStarOfClassOrInterfaceType0)
-    OptTypeBound0                                     -> <some>(TypeBound)
-    OptTypeBound0                                     -> <none>()
+    OptTypeBound1                                     -> <some>(TypeBound)
+    OptTypeBound1                                     -> <none>()
     OptWildcardBound0                                 -> <some>(WildcardBound)
     OptWildcardBound0                                 -> <none>()
     ListStarOfActualTypeArg0                          -> ListPlusOfActualTypeArg0
@@ -383,18 +383,20 @@ regular tree grammar
     OptDeciFloatExponentPart0                         -> <string>
     ListStarOfCommentPart0                            -> <string>
     ListPlusOfCommentPart0                            -> <string>
-    ListStarOfCharClass0                              -> ListPlusOfCharClass0
-    ListStarOfCharClass0                              -> <nil>()
-    ListStarOfCharClass0                              -> <conc>(ListStarOfCharClass0,ListStarOfCharClass0)
-    ListPlusOfCharClass0                              -> <conc>(ListStarOfCharClass0,ListPlusOfCharClass0)
-    ListPlusOfCharClass0                              -> <conc>(ListPlusOfCharClass0,ListStarOfCharClass0)
-    ListPlusOfCharClass0                              -> <conc>(ListPlusOfCharClass0,ListPlusOfCharClass0)
-    ListPlusOfCharClass0                              -> <cons>(<int>,ListStarOfCharClass0)
+    ListStarOfCharClass1                              -> ListPlusOfCharClass2
+    ListStarOfCharClass1                              -> <nil>()
+    ListStarOfCharClass1                              -> <conc>(ListStarOfCharClass1,ListStarOfCharClass1)
+    ListPlusOfCharClass2                              -> <conc>(ListStarOfCharClass1,ListPlusOfCharClass2)
+    ListPlusOfCharClass2                              -> <conc>(ListPlusOfCharClass2,ListStarOfCharClass1)
+    ListPlusOfCharClass2                              -> <conc>(ListPlusOfCharClass2,ListPlusOfCharClass2)
+    ListPlusOfCharClass2                              -> <cons>(<int>,ListStarOfCharClass1)
     ClassMemberDec                                    -> LayerDecl
     TypeDec                                           -> DirectorDecl
+    ActivationBlock                                   -> Pause(Block)
+    ActivationBlock                                   -> Restore(Block)
     ActivationBlock                                   -> Deactivation(Block)
     ActivationBlock                                   -> Activation(Block)
-    PartialMethodHead                                 -> PartialMethodHead(OptTypeParams0,TimingSpecifier,ResultType,Id,ListStarOfFormalParam0,OptThrows0)
+    PartialMethodHead                                 -> PartialMethodHead(OptTypeParams1,TimingSpecifier,ResultType,Id,ListStarOfFormalParam0,OptThrows1)
     PartialMethodDec                                  -> PartialMethodDec(PartialMethodHead,MethodBody)
     MethodSpec                                        -> Proceed()
     LayerMemberDec                                    -> MethodDec
@@ -421,7 +423,7 @@ regular tree grammar
     TransitionRule                                    -> SwitchLayer(Guard,NewLayer)
     TransitionRuleDecl                                -> TransitionRuleDecl(Id,ListStarOfFormalParam0,TransitionRule)
     Sender                                            -> SendTo(Expr)
-    EventDecl                                         -> EventDecl(Id,ListStarOfFormalParam0,Selector,OptSender0)
+    EventDecl                                         -> EventDecl(Id,ListStarOfFormalParam0,Selector,OptSender1)
     DirectionBody                                     -> TransitionRuleDecl
     DirectionBody                                     -> EventDecl
     DirectorDecl                                      -> Direction(Id,ListStarOfDirectionBody0)
@@ -453,8 +455,8 @@ regular tree grammar
     FieldPattern                                      -> FieldPattern(AnnoPattern,FieldModPattern,TypePattern,ClassMemberNamePattern)
     MethodConstrPattern                               -> ConstrPattern
     MethodConstrPattern                               -> MethodPattern
-    ConstrPattern                                     -> ConstrPattern(AnnoPattern,ConstrModPattern,ConstrNamePattern,ListStarOfFormalPattern0,OptThrowsPattern0)
-    MethodPattern                                     -> MethodPattern(AnnoPattern,MethodModPattern,TypePattern,ClassMemberNamePattern,ListStarOfFormalPattern0,OptThrowsPattern0)
+    ConstrPattern                                     -> ConstrPattern(AnnoPattern,ConstrModPattern,ConstrNamePattern,ListStarOfFormalPattern0,OptThrowsPattern1)
+    MethodPattern                                     -> MethodPattern(AnnoPattern,MethodModPattern,TypePattern,ClassMemberNamePattern,ListStarOfFormalPattern0,OptThrowsPattern1)
     FormalPattern                                     -> VarArityParamPattern(TypePattern)
     FormalPattern                                     -> TypePattern
     FormalPattern                                     -> FormalWildcard()
@@ -562,9 +564,9 @@ regular tree grammar
     Expr                                              -> PostIncr(Expr)
     Expr                                              -> ExprName
     MethodSpec                                        -> GenericMethod(AmbName,TypeArgs,Id)
-    MethodSpec                                        -> QSuperMethod(TypeName,OptTypeArgs1,Id)
-    MethodSpec                                        -> SuperMethod(OptTypeArgs1,Id)
-    MethodSpec                                        -> Method(Expr,OptTypeArgs1,Id)
+    MethodSpec                                        -> QSuperMethod(TypeName,OptTypeArgs2,Id)
+    MethodSpec                                        -> SuperMethod(OptTypeArgs2,Id)
+    MethodSpec                                        -> Method(Expr,OptTypeArgs2,Id)
     MethodSpec                                        -> Method(MethodName)
     Expr                                              -> Invoke(MethodSpec,ListStarOfExpr0)
     ArraySubscript                                    -> Expr
@@ -581,8 +583,8 @@ regular tree grammar
     ArrayCreationExpr                                 -> NewArray(ArrayBaseType,ListPlusOfDim0,ArrayInit)
     ArrayCreationExpr                                 -> NewArray(ArrayBaseType,ListPlusOfDimExpr0,ListStarOfDim0)
     Expr                                              -> ArrayCreationExpr
-    Expr                                              -> QNewInstance(Expr,OptTypeArgs1,Id,OptTypeArgs1,ListStarOfExpr0,OptClassBody0)
-    Expr                                              -> NewInstance(OptTypeArgs1,ClassOrInterfaceType,ListStarOfExpr0,OptClassBody0)
+    Expr                                              -> QNewInstance(Expr,OptTypeArgs2,Id,OptTypeArgs2,ListStarOfExpr0,OptClassBody0)
+    Expr                                              -> NewInstance(OptTypeArgs2,ClassOrInterfaceType,ListStarOfExpr0,OptClassBody0)
     ClassMemberDec                                    -> Semicolon()
     ClassMemberDec                                    -> InterfaceDec
     ClassMemberDec                                    -> ClassDec
@@ -601,7 +603,7 @@ regular tree grammar
     ClassMod                                          -> Protected
     ClassMod                                          -> Public
     ClassMod                                          -> Abstract
-    ClassDecHead                                      -> ClassDecHead(ListStarOfAnno_ClassMod0,Id,OptTypeParams0,OptSuper0,OptInterfaces0)
+    ClassDecHead                                      -> ClassDecHead(ListStarOfAnno_ClassMod0,Id,OptTypeParams1,OptSuper0,OptInterfaces1)
     ClassBody                                         -> ClassBody(ListStarOfClassBodyDec0)
     ClassDec                                          -> ClassDec(ClassDecHead,ClassBody)
     ClassDec                                          -> EnumDec
@@ -617,7 +619,7 @@ regular tree grammar
     InterfaceMemberDec                                -> AbstractMethodDec
     InterfaceMemberDec                                -> ConstantDec
     ExtendsInterfaces                                 -> ExtendsInterfaces(ListPlusOfInterfaceType0)
-    InterfaceDecHead                                  -> InterfaceDecHead(ListStarOfAnno_InterfaceMod0,Id,OptTypeParams0,OptExtendsInterfaces0)
+    InterfaceDecHead                                  -> InterfaceDecHead(ListStarOfAnno_InterfaceMod0,Id,OptTypeParams1,OptExtendsInterfaces1)
     InterfaceDec                                      -> InterfaceDec(InterfaceDecHead,ListStarOfInterfaceMemberDec0)
     InterfaceDec                                      -> AnnoDec
     DefaultVal                                        -> DefaultVal(ElemVal)
@@ -632,8 +634,8 @@ regular tree grammar
     AnnoDec                                           -> AnnoDec(AnnoDecHead,ListStarOfAnnoElemDec0)
     AbstractMethodMod                                 -> Abstract
     AbstractMethodMod                                 -> Public
-    AbstractMethodDec                                 -> DeprAbstractMethodDec(ListStarOfAnno_AbstractMethodMod0,OptTypeParams0,ResultType,Id,ListStarOfFormalParam0,ListPlusOfDim0,OptThrows0)
-    AbstractMethodDec                                 -> AbstractMethodDec(ListStarOfAnno_AbstractMethodMod0,OptTypeParams0,ResultType,Id,ListStarOfFormalParam0,OptThrows0)
+    AbstractMethodDec                                 -> DeprAbstractMethodDec(ListStarOfAnno_AbstractMethodMod0,OptTypeParams1,ResultType,Id,ListStarOfFormalParam0,ListPlusOfDim0,OptThrows1)
+    AbstractMethodDec                                 -> AbstractMethodDec(ListStarOfAnno_AbstractMethodMod0,OptTypeParams1,ResultType,Id,ListStarOfFormalParam0,OptThrows1)
     ConstantMod                                       -> Final
     ConstantMod                                       -> Static
     ConstantMod                                       -> Public
@@ -643,16 +645,16 @@ regular tree grammar
     EnumConst                                         -> EnumConst(Id,OptEnumConstArgs0,OptClassBody0)
     EnumBody                                          -> EnumBody(ListStarOfEnumConst0,OptEnumBodyDecs0)
     EnumBody                                          -> EnumBody(ListStarOfEnumConst0,OptEnumBodyDecs0)
-    EnumDecHead                                       -> EnumDecHead(ListStarOfAnno_ClassMod0,Id,OptInterfaces0)
+    EnumDecHead                                       -> EnumDecHead(ListStarOfAnno_ClassMod0,Id,OptInterfaces1)
     EnumDec                                           -> EnumDec(EnumDecHead,EnumBody)
     ConstrMod                                         -> Private
     ConstrMod                                         -> Protected
     ConstrMod                                         -> Public
-    ConstrInv                                         -> QSuperConstrInv(Expr,OptTypeArgs1,ListStarOfExpr0)
-    ConstrInv                                         -> SuperConstrInv(OptTypeArgs1,ListStarOfExpr0)
-    ConstrInv                                         -> AltConstrInv(OptTypeArgs1,ListStarOfExpr0)
+    ConstrInv                                         -> QSuperConstrInv(Expr,OptTypeArgs2,ListStarOfExpr0)
+    ConstrInv                                         -> SuperConstrInv(OptTypeArgs2,ListStarOfExpr0)
+    ConstrInv                                         -> AltConstrInv(OptTypeArgs2,ListStarOfExpr0)
     ConstrBody                                        -> ConstrBody(OptConstrInv0,ListStarOfBlockStm0)
-    ConstrHead                                        -> ConstrDecHead(ListStarOfAnno_ConstrMod0,OptTypeParams0,Id,ListStarOfFormalParam0,OptThrows0)
+    ConstrHead                                        -> ConstrDecHead(ListStarOfAnno_ConstrMod0,OptTypeParams1,Id,ListStarOfFormalParam0,OptThrows1)
     ConstrDec                                         -> ConstrDec(ConstrHead,ConstrBody)
     StaticInit                                        -> StaticInit(Block)
     InstanceInit                                      -> InstanceInit(Block)
@@ -674,8 +676,8 @@ regular tree grammar
     FormalParam                                       -> Param(ListStarOfAnno_VarMod0,Type,VarDecId)
     ResultType                                        -> Void()
     ResultType                                        -> Type
-    MethodDecHead                                     -> DeprMethodDecHead(ListStarOfAnno_MethodMod0,OptTypeParams0,ResultType,Id,ListStarOfFormalParam0,ListPlusOfDim0,OptThrows0)
-    MethodDecHead                                     -> MethodDecHead(ListStarOfAnno_MethodMod0,OptTypeParams0,ResultType,Id,ListStarOfFormalParam0,OptThrows0)
+    MethodDecHead                                     -> DeprMethodDecHead(ListStarOfAnno_MethodMod0,OptTypeParams1,ResultType,Id,ListStarOfFormalParam0,ListPlusOfDim0,OptThrows1)
+    MethodDecHead                                     -> MethodDecHead(ListStarOfAnno_MethodMod0,OptTypeParams1,ResultType,Id,ListStarOfFormalParam0,OptThrows1)
     MethodDec                                         -> MethodDec(MethodDecHead,MethodBody)
     BlockStm                                          -> Stm
     BlockStm                                          -> ClassDecStm(ClassDec)
@@ -744,15 +746,15 @@ regular tree grammar
     TypeVar                                           -> TypeVar(TypeVarId)
     TypeDecSpec                                       -> Member(TypeDecSpec,TypeArgs,Id)
     TypeDecSpec                                       -> TypeName
-    InterfaceType                                     -> InterfaceType(TypeDecSpec,OptTypeArgs1)
-    ClassType                                         -> ClassType(TypeDecSpec,OptTypeArgs1)
-    ClassOrInterfaceType                              -> ClassOrInterfaceType(TypeDecSpec,OptTypeArgs1)
+    InterfaceType                                     -> InterfaceType(TypeDecSpec,OptTypeArgs2)
+    ClassType                                         -> ClassType(TypeDecSpec,OptTypeArgs2)
+    ClassOrInterfaceType                              -> ClassOrInterfaceType(TypeDecSpec,OptTypeArgs2)
     RefType                                           -> ArrayType
     RefType                                           -> ClassOrInterfaceType
     TypeVarId                                         -> Id
     TypeParams                                        -> TypeParams(ListPlusOfTypeParam0)
     TypeBound                                         -> TypeBound(ListPlusOfClassOrInterfaceType0)
-    TypeParam                                         -> TypeParam(TypeVarId,OptTypeBound0)
+    TypeParam                                         -> TypeParam(TypeVarId,OptTypeBound1)
     WildcardBound                                     -> WildcardLowerBound(RefType)
     WildcardBound                                     -> WildcardUpperBound(RefType)
     ActualTypeArg                                     -> Wildcard(OptWildcardBound0)
@@ -858,4 +860,4 @@ regular tree grammar
     EndOfFile                                         -> <string>
     CarriageReturn                                    -> <string>
     LineTerminator                                    -> <string>
-    UnicodeEscape                                     -> UnicodeEscape(ListPlusOfCharClass0,<int>,<int>,<int>,<int>)
+    UnicodeEscape                                     -> UnicodeEscape(ListPlusOfCharClass2,<int>,<int>,<int>,<int>)

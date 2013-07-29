@@ -215,6 +215,8 @@ exports
   context-free syntax
     "activate" Block   -> ActivationBlock {cons("Activation")}
     "deactivate" Block -> ActivationBlock {cons("Deactivation")}
+    "restore" Block    -> ActivationBlock {cons("Restore")}
+    "pause" Block      -> ActivationBlock {cons("Pause")}
 
   )
 
@@ -242,10 +244,13 @@ exports
     "proceed"    -> Keyword 
     "activate"   -> Keyword 
     "deactivate" -> Keyword 
+    "restore"    -> Keyword 
+    "pause"      -> Keyword 
 
   lexical restrictions
     "after" "before" "layer" "direction" "transition" "sendTo" "switchTo"
-    "activates" "proceed" "activate" "deactivate" -/- [A-Za-z0-9\_\$]
+    "activates" "proceed" "activate" "deactivate" "restore" "pause"
+    -/- [A-Za-z0-9\_\$]
 
 module languages/eventcj/common/BooleanComposition[E]
 exports

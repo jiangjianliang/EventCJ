@@ -9,6 +9,8 @@
    PartialMethodHead.6:opt                 -- _1,
    Activation                              -- KW["activate"] _1,
    Deactivation                            -- KW["deactivate"] _1,
+   Restore                                 -- KW["restore"] _1,
+   Pause                                   -- KW["pause"] _1,
    AfterTiming                             -- KW["after"],
    BeforeTiming                            -- KW["before"],
    AroundTiming                            -- KW["around"],

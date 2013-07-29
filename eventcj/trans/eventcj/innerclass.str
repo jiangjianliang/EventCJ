@@ -69,7 +69,21 @@ rules
   	]
   	where
   		b' := <pp-java-string>b
-  
+   
+  methods-to-inner(|cname,lname):
+  	Restore(b) -> $[
+  		public void restore()[b']
+  	 ]
+ 		where
+  		b' := <pp-java-string>b
+  			
+  methods-to-inner(|cname,lname):
+  	Pause(b) -> $[
+  	 	 	public void pause()[b']
+  	  ]
+  	where
+  	 b' := <pp-java-string>b
+  //end
   genThis(|cname):
   	() -> Id($[[cname].this])
   

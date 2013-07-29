@@ -7,6 +7,12 @@ direction Help{
 
 public class Test<T1,T2> extends String implements I1, I2, I3{
 	layer L1{
+		restore{
+			foo();
+		}
+		pause{
+			bar();
+		}
 		after void m1(Object o){}
 	}
 	void m1(Object o){}
