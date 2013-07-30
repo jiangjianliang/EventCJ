@@ -1,7 +1,11 @@
 #################
+## Spoofax
+#################
+eventcj/test/*
+
+#################
 ## Eclipse
 #################
-
 *.pydevproject
 .project
 .metadata
