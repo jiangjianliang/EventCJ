@@ -1,9 +1,7 @@
 #################
 ## Spoofax
 #################
-*.aj
-*.aterm
-*.ecj
+eventcj/test/
 
 #################
 ## Eclipse
