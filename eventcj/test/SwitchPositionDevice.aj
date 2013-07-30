@@ -4,22 +4,23 @@ import java.util.Iterator;
 import eventcj.*;
 aspect SwitchPositionDevice{
 	
-	pointcut GPSEvent_A((Navigation n, int s)): target(n) && call(void Navigation.onStatusChanged(s));
-	pointcut WifiEvent_A((Navigation n, int s)): target(n) && call(void Navigation.onStatusChanged(s));
-	pointcut Boarding_A(()): call(void *.cabinModeEntered());
-	pointcut Arriving_A(()): call(void *.cabinModeExit());
+	pointcut GPSEvent_A(Navigation n, int s): target(n) && call(void Navigation.onStatusChanged(s));pointcut WifiEvent_B(Navigation n, int s): target(n) && call(void Navigation.onStatusChanged(s));
 	
-	after(Navigation nint s): GPSEvent_A(n, s){
+	pointcut Boarding_A(): call(void *.cabinModeEntered());
+	pointcut Arriving_A(): call(void *.cabinModeExit());
+	
+	after(Navigation n, int s): GPSEvent_A(n, s){
 		InstanceLayerManager lm=n.getLayerManager();
 		if(lm.isActive("WifiNavi"))lm.deactivate("WifiNavi").activate(n.createLayerForName("GPSNavi"));
 		else if(!lm.isActive("onBoard"))lm.activate(n.createLayerForName("GPSNavi"));
+		else lm.deactivateAll().activate(n.createLayerForName("GPSNavi"));
 	}
-	
-	after(Navigation nint s): WifiEvent_A(n, s){
+	before(Navigation n, int s): WifiEvent_B(n, s){
 		InstanceLayerManager lm=n.getLayerManager();
 		if(lm.isActive("GPSNavi"))lm.deactivate("GPSNavi").activate(n.createLayerForName("WifiNavi"));
 		else if(!lm.isActive("onBoard"))lm.activate(n.createLayerForName("WifiNavi"));
 	}
+	
 	
 	after(): Boarding_A(){
 		LayerManager lm=LayerManager.getInstance();

@@ -2283,6 +2283,10 @@ rules
             + fail)> t_2
 
   EventCJParenthesize :
+    TransitionRuleComposition(t_0, t_1) -> TransitionRuleComposition(t_0, Parenthetical(t_1))
+    where <(?TransitionRuleComposition(_, _) + fail)> t_1
+
+  EventCJParenthesize :
     OrComp(t_0, t_1) -> OrComp(t_0, Parenthetical(t_1))
     where <(?OrComp(_, _) + fail)> t_1
 

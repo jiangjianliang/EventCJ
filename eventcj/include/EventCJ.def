@@ -295,7 +295,9 @@ exports
 	  	"transition" Id "(" {FormalParam "," }* ")" ":" TransitionRule ";" -> TransitionRuleDecl{cons("TransitionRuleDecl")}
 	  	Guard "switchTo" NewLayer -> TransitionRule {cons("SwitchLayer")}
 	  	Guard "activate" Id -> TransitionRule {cons("ActivateLayer")}
-	  	TransitionRule "|" TransitionRule -> TransitionRule{cons("TransitionRuleComposition")}
+	  	%% modified by wander, add left attribute
+	  	%%TransitionRule "|" TransitionRule -> TransitionRule{cons("TransitionRuleComposition")}
+	  	TransitionRule "|" TransitionRule -> TransitionRule{cons("TransitionRuleComposition"),left}
 	  	
 	context-free syntax
 		Id -> Guard

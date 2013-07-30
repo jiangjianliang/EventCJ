@@ -8,7 +8,7 @@ direction SwitchPositionDevice{
 	: sendTo(n);
 	
 	declare event WifiEvent(Navigation n, int s)
-	: after call(void Navigation.onStatusChanged(s))
+	: before call(void Navigation.onStatusChanged(s))
 	&& target(n) 
 	//&& args(s) && if(s==LocationProvider.OUT_OF_SERVICE)
 	: sendTo(n);
@@ -21,7 +21,8 @@ direction SwitchPositionDevice{
 	
 	transition GPSEvent():
 		WifiNavi switchTo GPSNavi |
-		not onBoard activate GPSNavi;
+		not onBoard activate GPSNavi |
+		* switchTo GPSNavi;
 	transition WifiEvent():
 		GPSNavi switchTo WifiNavi |
 		not onBoard activate WifiNavi;

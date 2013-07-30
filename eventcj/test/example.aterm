@@ -66,7 +66,17 @@ CompilationUnit(
     , ClassBody(
         [ Layer(
             Id("L1")
-          , [ PartialMethodDec(
+          , [ Restore(
+                Block(
+                  [ExprStm(Invoke(Method(MethodName(Id("foo"))), []))]
+                )
+              )
+            , Pause(
+                Block(
+                  [ExprStm(Invoke(Method(MethodName(Id("bar"))), []))]
+                )
+              )
+            , PartialMethodDec(
                 PartialMethodHead(
                   None()
                 , AfterTiming()

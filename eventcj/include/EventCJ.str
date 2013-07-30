@@ -8,9 +8,9 @@ signature
                               : MethodMod -> MethodMod_NotMethodMod0
                               : NotSimpleAnnoPattern -> SimpleAnnoPattern_NotSimpleAnnoPattern0
                               : SimpleAnnoPattern -> SimpleAnnoPattern_NotSimpleAnnoPattern0
-    Some                      : TypeArgs -> OptTypeArgs2
-    None                      : OptTypeArgs2
-                              : TypeArgs -> OptTypeArgs2
+    Some                      : TypeArgs -> OptTypeArgs1
+    None                      : OptTypeArgs1
+                              : TypeArgs -> OptTypeArgs1
                               : ClassMod -> Anno_ClassMod1
                               : Anno -> Anno_ClassMod1
                               : InterfaceMod -> Anno_InterfaceMod1
@@ -27,10 +27,10 @@ signature
                               : Anno -> Anno_MethodMod1
                               : FieldMod -> Anno_FieldMod1
                               : Anno -> Anno_FieldMod1
-    Conc                      : ListStarOfCharClass1 * ListPlusOfCharClass2 -> ListPlusOfCharClass2
-    Conc                      : ListPlusOfCharClass2 * ListStarOfCharClass1 -> ListPlusOfCharClass2
-    Conc                      : ListPlusOfCharClass2 * ListPlusOfCharClass2 -> ListPlusOfCharClass2
-    Cons                      : Int * ListStarOfCharClass1 -> ListPlusOfCharClass2
+    Conc                      : ListStarOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
+    Conc                      : ListPlusOfCharClass0 * ListStarOfCharClass0 -> ListPlusOfCharClass0
+    Conc                      : ListPlusOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
+    Cons                      : Int * ListStarOfCharClass0 -> ListPlusOfCharClass0
     Pause                     : Block -> ActivationBlock
     Restore                   : Block -> ActivationBlock
     Deactivation              : Block -> ActivationBlock
@@ -148,9 +148,9 @@ signature
                               : Expr -> CondMid
     Proceed                   : MethodSpec
     GenericMethod             : AmbName * TypeArgs * Id -> MethodSpec
-    QSuperMethod              : TypeName * OptTypeArgs2 * Id -> MethodSpec
-    SuperMethod               : OptTypeArgs2 * Id -> MethodSpec
-    Method                    : Expr * OptTypeArgs2 * Id -> MethodSpec
+    QSuperMethod              : TypeName * OptTypeArgs1 * Id -> MethodSpec
+    SuperMethod               : OptTypeArgs1 * Id -> MethodSpec
+    Method                    : Expr * OptTypeArgs1 * Id -> MethodSpec
     Method                    : MethodName -> MethodSpec
                               : Expr -> ArraySubscript
     ArrayAccess               : Expr * ArraySubscript -> ArrayAccess
@@ -228,9 +228,9 @@ signature
                               : Private -> ConstrMod
                               : Protected -> ConstrMod
                               : Public -> ConstrMod
-    QSuperConstrInv           : Expr * OptTypeArgs2 * List(Expr) -> ConstrInv
-    SuperConstrInv            : OptTypeArgs2 * List(Expr) -> ConstrInv
-    AltConstrInv              : OptTypeArgs2 * List(Expr) -> ConstrInv
+    QSuperConstrInv           : Expr * OptTypeArgs1 * List(Expr) -> ConstrInv
+    SuperConstrInv            : OptTypeArgs1 * List(Expr) -> ConstrInv
+    AltConstrInv              : OptTypeArgs1 * List(Expr) -> ConstrInv
     ConstrBody                : Option(ConstrInv) * List(BlockStm) -> ConstrBody
     ConstrDecHead             : List(Anno_ConstrMod1) * Option(TypeParams) * Id * List(FormalParam) * Option(Throws) -> ConstrHead
     ConstrDec                 : ConstrHead * ConstrBody -> ConstrDec
@@ -362,8 +362,8 @@ signature
                               : ArrayAccess -> Expr
                               : FieldAccess -> Expr
                               : ArrayCreationExpr -> Expr
-    QNewInstance              : Expr * OptTypeArgs2 * Id * OptTypeArgs2 * List(Expr) * Option(ClassBody) -> Expr
-    NewInstance               : OptTypeArgs2 * ClassOrInterfaceType * List(Expr) * Option(ClassBody) -> Expr
+    QNewInstance              : Expr * OptTypeArgs1 * Id * OptTypeArgs1 * List(Expr) * Option(ClassBody) -> Expr
+    NewInstance               : OptTypeArgs1 * ClassOrInterfaceType * List(Expr) * Option(ClassBody) -> Expr
     QThis                     : TypeName -> Expr
     This                      : Expr
     Lit                       : Literal -> Expr
@@ -373,9 +373,9 @@ signature
     TypeVar                   : TypeVarId -> TypeVar
     Member                    : TypeDecSpec * TypeArgs * Id -> TypeDecSpec
                               : TypeName -> TypeDecSpec
-    InterfaceType             : TypeDecSpec * OptTypeArgs2 -> InterfaceType
-    ClassType                 : TypeDecSpec * OptTypeArgs2 -> ClassType
-    ClassOrInterfaceType      : TypeDecSpec * OptTypeArgs2 -> ClassOrInterfaceType
+    InterfaceType             : TypeDecSpec * OptTypeArgs1 -> InterfaceType
+    ClassType                 : TypeDecSpec * OptTypeArgs1 -> ClassType
+    ClassOrInterfaceType      : TypeDecSpec * OptTypeArgs1 -> ClassOrInterfaceType
                               : ArrayType -> RefType
                               : ClassOrInterfaceType -> RefType
                               : Id -> TypeVarId
@@ -455,7 +455,7 @@ signature
     Id                        : ID -> Id
                               : String -> ID
                               : String -> UnicodeEscape
-    UnicodeEscape             : ListPlusOfCharClass2 * Int * Int * Int * Int -> UnicodeEscape
+    UnicodeEscape             : ListPlusOfCharClass0 * Int * Int * Int * Int -> UnicodeEscape
 
 
 signature

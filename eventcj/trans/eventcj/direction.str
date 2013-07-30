@@ -55,24 +55,32 @@ rules
   
   genBeforeTransitionAdvice(|name,body):
   	(param*,_,(_,_)) -> 
-  	$[before([paramString*]): [name]_B[param'*]{
+  	//$[before([paramString*]): [name]_B[param'*]{
+  	//modified by wander, remove ()
+  	$[before[paramString*]: [name]_B[param'*]{
   		[body];
   	}]
   	where
   		param'* := <pp-java-string><list-to-args><map(extract-formal-vars)>param*;
-  		paramString* := <pp-java-string>param*
+  		//paramString* := <pp-java-string>param*
+  		//modified by wander
+  		paramString* := <pp-java-string><list-to-args>param*
   
   genAfterTransitionAdvice(|name,body):
   	(_,_,(_,[])) -> $[]
   
   genAfterTransitionAdvice(|name,body):
   	(param*,_,(_,_)) -> 
-  	$[after([paramString*]): [name]_A[param'*]{
+  	//$[after([paramString*]): [name]_A[param'*]{
+  	//modified by wander, remove ()
+  	$[after[paramString*]: [name]_A[param'*]{
   		[body];
   	}]
   	where
   		param'* := <pp-java-string><list-to-args><map(extract-formal-vars)>param*;
-  		paramString* := <map(pp-java-string)>param*
+  		//paramString* := <map(pp-java-string)>param*
+  		//modified by wander
+  		paramString* := <pp-java-string><list-to-args>param*
   
   gen-transition-guard:
   	AnnonLayer() -> $[]

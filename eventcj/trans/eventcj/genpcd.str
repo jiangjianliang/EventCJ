@@ -22,9 +22,14 @@ rules
   	[] -> $[]
   
   genPcd(|name,k,param*):
-  	sel* -> $[pointcut [name]_[k]([param'*]): [pcd];]
+  	//sel* -> $[pointcut [name]_[k]([param'*]): [pcd];]
+  	//modified by wander, remove ()
+  	sel* -> $[pointcut [name]_[k][param'*]: [pcd];]
   	where
+  		//param'* := <pp-java-string><list-to-args>param*;
+  		//modified by wander  		
   		param'* := <pp-java-string><list-to-args>param*;
+  		
   		pcd := <disjunct2pcd>sel*
   
   

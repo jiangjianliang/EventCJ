@@ -26,18 +26,18 @@ folding Default folding definitions
   StringLiteral
   StringLiteral.String
   VarDecId.ArrayVarDecId
-  OptTypeParams1
+  OptTypeParams0
   TypeParams.TypeParams
   TypeParam.TypeParam
-  OptTypeBound1
+  OptTypeBound0
   TypeBound.TypeBound
-  OptThrows1
+  OptThrows0
   Throws.ThrowsDec
   ClassType.ClassType
-  OptInterfaces1
+  OptInterfaces0
   Interfaces.ImplementsDec
   InterfaceType.InterfaceType
-  OptExtendsInterfaces1
+  OptExtendsInterfaces0
   ExtendsInterfaces.ExtendsInterfaces
   MethodSpec.SuperMethod
   MethodSpec.QSuperMethod
@@ -53,7 +53,7 @@ folding Default folding definitions
   ClassMemberNamePattern.WildcardMemberName
   TypePattern
   FormalPattern.VarArityParamPattern
-  OptThrowsPattern1
+  OptThrowsPattern0
   ThrowsPattern.ThrowsPattern
   ClassNamePattern.Generic
   ClassNamePattern.Subtype
@@ -62,6 +62,6 @@ folding Default folding definitions
   ConstrModPattern.ModPattern
   ConstrNamePattern.ConstrName
   ConstrNamePattern.WildcardConstrName
-  OptSender1
+  OptSender0
   Sender.SendTo
   TransitionRuleDecl.TransitionRuleDecl

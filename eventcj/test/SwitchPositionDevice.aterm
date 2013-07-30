@@ -97,8 +97,11 @@ CompilationUnit(
           Id("GPSEvent")
         , []
         , TransitionRuleComposition(
-            SwitchLayer(Id("WifiNavi"), Id("GPSNavi"))
-          , ActivateLayer(IfNotActive(Id("onBoard")), Id("GPSNavi"))
+            TransitionRuleComposition(
+              SwitchLayer(Id("WifiNavi"), Id("GPSNavi"))
+            , ActivateLayer(IfNotActive(Id("onBoard")), Id("GPSNavi"))
+            )
+          , SwitchLayer(AnnonLayer(), Id("GPSNavi"))
           )
         )
       , TransitionRuleDecl(
