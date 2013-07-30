@@ -1,9 +1,0 @@
-module EventCJ-Folding
-
-imports EventCJ-Folding.generated
-
-folding
-  
-  // This file can be used for custom folding rules.
-  //
-  // See the imported file for a brief introduction and examples.
