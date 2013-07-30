@@ -1,10 +1,7 @@
 #################
 ## Spoofax
 #################
-eventcj/test/*.ecj
-eventcj/test/*.aterm
-eventcj/test/*.aj
-eventcj/test/*.spt
+eventcj/test/
 
 #################
 ## Eclipse
