@@ -1,7 +1,8 @@
 #################
 ## Spoofax
 #################
-eventcj/editor/
+eventcj/editor/*.esv
+#evetncj/editor/*.generated.esv
 eventcj/include/
 eventcj/test/
 

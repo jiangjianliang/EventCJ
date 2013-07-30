@@ -170,3 +170,104 @@ rules
   	where
   		r1' := <gen-transition-code>(r1,sendto);
   		r2' := <gen-transition-code>(r2,sendto)
+  		
+//featured by wander
+ gen-transition-save-deactivate:
+	t ->$[save([t']).deactivate([t']).]
+	where
+		t' := <to-layer>t
+		
+ gen-transition-deactivate:
+ 	IfNotActive(t) -> $[]
+
+ gen-transition-code:
+ 	(SwitchLayerSave(a,b), None()) -> 
+ 	$[
+ 		[a']lm.[<gen-transition-save-deactivate>a]activate([b'])
+ 	]
+ 	where
+ 		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  
+   gen-transition-code:
+  	(SwitchLayerSave(a, NoLayer()),_) ->
+  	$[
+  		[a']lm.[<gen-transition-save-deactivate>a]end()
+  	]
+  	where
+  		a' := <gen-transition-guard>a
+  
+  gen-transition-code:
+  	(SwitchLayerSave(a,NoLayer()),Some(SendTo(s))) ->
+  	$[
+  		[a']lm.[<gen-transition-save-deactivate>a]end()
+  	]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a
+  
+  gen-transition-code:
+  	(SwitchLayerSave(a,b), Some(SendTo(s))) -> 
+  	$[
+  		[a']lm.[<gen-transition-save-deactivate>a]activate([s'].createLayerForName([b']))
+  	]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a;
+  		b' := <to-layer>b
+  
+  gen-transition-code:
+  	(SwitchLayerRestore(a,b), None()) ->
+  	$[
+  		[a']lm.[<gen-transition-deactivate>a]activate([b']).restore([b'])
+  	]
+  	where
+  		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  		
+  gen-transition-code:
+  	(SwitchLayerRestore(a,b), Some(SendTo(s))) ->
+  	$[
+  		Layer newLayer = [s'].createLayerForName([b']);
+  		[a']lm.[<gen-transition-deactivate>a]activate(newLayer).restore(newLayer)
+  	]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a;
+  		b' := <to-layer>b
+
+  gen-transition-code:
+  	(ActivateLayerRestore(a,b), None()) ->$[[a']lm.activate([b']).restore([b'])]
+  	where
+  		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  gen-transition-code:
+  	(ActivateLayerRestore(a,b), Some(SendTo(s))) ->
+  	$[
+  		Layer newLayer = [s'].createLayerForName([b']);
+  		[a']lm.activate(newLayer).restore(newLayer)
+  	]
+  	where
+  		s' := <pp-java-string>s;
+ 		a' := <gen-transition-guard-on(|s')>a;
+ 		b' := <to-layer>b
+  gen-transition-code:
+  	(SwitchLayerAll(a,b), None()) ->
+  	$[
+ 		[a']lm.[<gen-transition-save-deactivate>a]activate([b']).restore([b'])
+ 	]
+ 	where
+ 		a' := <gen-transition-guard>a;
+  		b' := <to-layer>b
+  		
+  gen-transition-code:
+  	(SwitchLayerAll(a,b), Some(SendTo(s))) ->
+   $[
+  		Layer newLayer = [s'].createLayerForName([b']);
+  		[a']lm.[<gen-transition-save-deactivate>a]activate(newLayer).restore(newLayer)
+  	]
+  	where
+  		s' := <pp-java-string>s;
+  		a' := <gen-transition-guard-on(|s')>a;
+  		b' := <to-layer>b
+  
