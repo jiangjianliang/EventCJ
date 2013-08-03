@@ -173,7 +173,7 @@ rules
   		
 //featured by wander
  gen-transition-save-deactivate:
-	t ->$[save([t']).deactivate([t']).]
+	t ->$[deactivate([t']).save([t']).]	
 	where
 		t' := <to-layer>t
 		
@@ -219,7 +219,7 @@ rules
   gen-transition-code:
   	(SwitchLayerRestore(a,b), None()) ->
   	$[
-  		[a']lm.[<gen-transition-deactivate>a]activate([b']).restore([b'])
+  		[a']lm.[<gen-transition-deactivate>a]restore([b']).activate([b'])
   	]
   	where
   		a' := <gen-transition-guard>a;
@@ -229,7 +229,7 @@ rules
   	(SwitchLayerRestore(a,b), Some(SendTo(s))) ->
   	$[
   		Layer newLayer = [s'].createLayerForName([b']);
-  		[a']lm.[<gen-transition-deactivate>a]activate(newLayer).restore(newLayer)
+  		[a']lm.[<gen-transition-deactivate>a]restore(newLayer).activate(newLayer)
   	]
   	where
   		s' := <pp-java-string>s;
@@ -237,24 +237,29 @@ rules
   		b' := <to-layer>b
 
   gen-transition-code:
-  	(ActivateLayerRestore(a,b), None()) ->$[[a']lm.activate([b']).restore([b'])]
+  	(ActivateLayerRestore(a,b), None()) ->
+  	$[
+  		[a']lm.restore([b']).activate([b'])
+  	]
   	where
   		a' := <gen-transition-guard>a;
   		b' := <to-layer>b
+  
   gen-transition-code:
   	(ActivateLayerRestore(a,b), Some(SendTo(s))) ->
   	$[
   		Layer newLayer = [s'].createLayerForName([b']);
-  		[a']lm.activate(newLayer).restore(newLayer)
+  		[a']lm.restore(newLayer).activate(newLayer)
   	]
   	where
   		s' := <pp-java-string>s;
  		a' := <gen-transition-guard-on(|s')>a;
  		b' := <to-layer>b
+  
   gen-transition-code:
   	(SwitchLayerAll(a,b), None()) ->
   	$[
- 		[a']lm.[<gen-transition-save-deactivate>a]activate([b']).restore([b'])
+ 		[a']lm.[<gen-transition-save-deactivate>a]restore([b']).activate([b'])
  	]
  	where
  		a' := <gen-transition-guard>a;
@@ -264,7 +269,7 @@ rules
   	(SwitchLayerAll(a,b), Some(SendTo(s))) ->
    $[
   		Layer newLayer = [s'].createLayerForName([b']);
-  		[a']lm.[<gen-transition-save-deactivate>a]activate(newLayer).restore(newLayer)
+  		[a']lm.[<gen-transition-save-deactivate>a]restore(newLayer).activate(newLayer)
   	]
   	where
   		s' := <pp-java-string>s;
