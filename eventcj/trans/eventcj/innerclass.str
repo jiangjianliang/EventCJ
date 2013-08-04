@@ -22,8 +22,8 @@ rules
   		public String getName(){return "[name]";}
   		[d'*]
   	}]
-		where
-			d'* := <map(methods-to-inner(|cname,name))> d*
+	where
+		d'* := <map(methods-to-inner(|cname,name))> d*
 
   genEmptyMethod:
   	d@MethodDec(h@MethodDecHead(annon,_,_,_,_,_), _) -> <genEmptyMethod'>(<filter(?Static())>annon,<filter(?Abstract())>annon,d) 
@@ -69,17 +69,18 @@ rules
   	]
   	where
   		b' := <pp-java-string>b
-   
+  
+  //featured by wander
   methods-to-inner(|cname,lname):
   	Restore(b) -> $[
   		public void restore()[b']
   	 ]
- 		where
-  		b' := <pp-java-string>b
+ 	where
+  	 b' := <pp-java-string>b
   			
   methods-to-inner(|cname,lname):
   	Pause(b) -> $[
-  	 	 	public void pause()[b']
+  	 	 public void pause()[b']
   	  ]
   	where
   	 b' := <pp-java-string>b
@@ -92,6 +93,11 @@ rules
   
   methods-to-inner(|cname, lname):
   	PartialMethodDec(h,b) -> <pp-java-string>MethodDec(<method-header-to-inner(|cname, lname)>h, b)
+  
+  //featured by wander
+   methods-to-inner(|cname, lname):
+  	FieldDec(a*, b, c*) -> <pp-java-string>FieldDec(a*, b, c*)
+  //end
   
   to-name:
   	AfterTiming() -> $[After]

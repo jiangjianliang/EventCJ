@@ -173,7 +173,7 @@ rules
   		
 //featured by wander
  gen-transition-save-deactivate:
-	t ->$[save([t']).deactivate([t']).]	
+	t ->$[pause([t']).deactivate([t']).]	
 	where
 		t' := <to-layer>t
 		
