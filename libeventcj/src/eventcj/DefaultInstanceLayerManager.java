@@ -64,4 +64,24 @@ public class DefaultInstanceLayerManager extends InstanceLayerManager {
 	public Iterator<Layer> reverseIterator() {
 		return activeLayers.descendingIterator();
 	}
+	//featured by wander
+	@Override
+	public InstanceLayerManager pause(String lname) {
+		Iterator<Layer> it = activeLayers.iterator();
+		while(it.hasNext()){
+			Layer l = it.next();
+			if(l.getName().equals(lname)){
+				l.pause();
+				return this;
+			}
+		}
+		return this;
+	}
+	@Override
+	public InstanceLayerManager restore(Layer l) {
+		if(l != null){
+			l.restore();			
+		}
+		return this;
+	}
 }
