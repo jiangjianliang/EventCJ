@@ -5,12 +5,13 @@ eventcj/editor/*.esv
 #evetncj/editor/*.generated.esv
 eventcj/include/
 eventcj/test/
+#.project
 
 #################
 ## Eclipse
 #################
 *.pydevproject
-.project
+
 .metadata
 bin/
 tmp/
