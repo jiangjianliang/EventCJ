@@ -33,6 +33,16 @@ public class NullInstanceLayerManager extends InstanceLayerManager {
 	public Iterator<Layer> reverseIterator() {
 		return null;
 	}
+	//featured by wander
+	@Override
+	public InstanceLayerManager pause(String l) {
+		return this;
+	}
+
+	@Override
+	public InstanceLayerManager restore(Layer l) {
+		return this;
+	}
 	
 
 }
