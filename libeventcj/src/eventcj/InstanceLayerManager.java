@@ -1,6 +1,8 @@
 package eventcj;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public abstract class InstanceLayerManager {
 	public abstract InstanceLayerManager activate(Layer l);
@@ -13,5 +15,13 @@ public abstract class InstanceLayerManager {
 	//featured by wander
 	public abstract InstanceLayerManager pause(String l);
 	public abstract InstanceLayerManager restore(Layer l);
+	private Map<String, Object> map = new HashMap<String, Object>();
+	public void put(String name, Object obj){
+		map.put(name, obj);
+	}
+	public Object get(String name){
+		Object obj = map.get(name);
+		return obj;
+	}
 	//end
 }
